@@ -7,17 +7,9 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-content="width=device-width,
-initial-scale=1.0,
-maximum-scale=1.0,
-user-scalable=no">
+content="width=device-width, initial-scale=1.0">
 
-<title>Visor 3D STL</title>
-
-
-<!-- =====================================================
-     IMPORT MAP
-===================================================== -->
+<title>Prueba STL</title>
 
 <script type="importmap">
 {
@@ -28,18 +20,12 @@ user-scalable=no">
 }
 </script>
 
-
 <style>
-
-* {
-  box-sizing: border-box;
-}
 
 html,
 body {
 
   margin: 0;
-  padding: 0;
 
   width: 100%;
   height: 100%;
@@ -52,23 +38,6 @@ body {
 
 }
 
-body {
-  touch-action: none;
-}
-
-
-#viewer {
-
-  position: fixed;
-
-  inset: 0;
-
-  width: 100%;
-  height: 100%;
-
-}
-
-
 #info {
 
   position: fixed;
@@ -79,123 +48,15 @@ body {
 
   z-index: 10;
 
-  padding: 12px;
+  padding: 15px;
+
+  background: black;
 
   color: white;
-
-  background: rgba(0,0,0,0.82);
 
   text-align: center;
 
-  font-size: 14px;
-
-  min-height: 44px;
-
 }
-
-
-#menu {
-
-  position: fixed;
-
-  top: 58px;
-  left: 10px;
-
-  z-index: 20;
-
-}
-
-
-#menuButton {
-
-  width: 48px;
-  height: 48px;
-
-  border: none;
-
-  border-radius: 12px;
-
-  background: rgba(0,0,0,0.82);
-
-  color: white;
-
-  font-size: 22px;
-
-}
-
-
-#menuPanel {
-
-  display: none;
-
-  width: 215px;
-
-  margin-top: 8px;
-
-  padding: 10px;
-
-  border-radius: 12px;
-
-  background: rgba(0,0,0,0.92);
-
-}
-
-
-#menuPanel button {
-
-  display: block;
-
-  width: 100%;
-
-  margin-bottom: 8px;
-
-  padding: 12px;
-
-  border: none;
-
-  border-radius: 10px;
-
-  background: white;
-
-  color: #222;
-
-  font-weight: bold;
-
-  font-size: 14px;
-
-}
-
-
-#menuPanel button:last-child {
-  margin-bottom: 0;
-}
-
-
-#dimensions {
-
-  position: fixed;
-
-  left: 10px;
-  bottom: 15px;
-
-  z-index: 10;
-
-  display: none;
-
-  padding: 10px 12px;
-
-  border-radius: 10px;
-
-  background: rgba(0,0,0,0.78);
-
-  color: white;
-
-  font-size: 13px;
-
-  line-height: 1.5;
-
-}
-
 
 </style>
 
@@ -205,137 +66,43 @@ body {
 <body>
 
 
-<div id="viewer"></div>
-
-
 <div id="info">
-  Iniciando visor...
-</div>
-
-
-<div id="dimensions"></div>
-
-
-<div id="menu">
-
-
-  <button id="menuButton">
-    ☰
-  </button>
-
-
-  <div id="menuPanel">
-
-
-    <button id="resetButton">
-      🔄 Centrar
-    </button>
-
-
-    <button id="wireButton">
-      🕸️ Wireframe
-    </button>
-
-
-    <button id="colorButton">
-      🎨 Cambiar color
-    </button>
-
-
-    <button id="shareButton">
-      🔗 Compartir
-    </button>
-
-
-    <button id="homeButton">
-      🏠 Inicio
-    </button>
-
-
-  </div>
-
-
+Cargando visor...
 </div>
 
 
 <script type="module">
 
 
-/* =====================================================
-   IMPORTACIONES
-===================================================== */
+import * as THREE
+from "three";
 
-
-import * as THREE from "three";
 
 import { OrbitControls }
 from "three/addons/controls/OrbitControls.js";
+
 
 import { STLLoader }
 from "three/addons/loaders/STLLoader.js";
 
 
 
-/* =====================================================
-   ELEMENTOS
-===================================================== */
-
-
 const info =
 document.getElementById("info");
 
 
-const dimensions =
-document.getElementById("dimensions");
 
-
-const menuButton =
-document.getElementById("menuButton");
-
-
-const menuPanel =
-document.getElementById("menuPanel");
-
-
-const resetButton =
-document.getElementById("resetButton");
-
-
-const wireButton =
-document.getElementById("wireButton");
-
-
-const colorButton =
-document.getElementById("colorButton");
-
-
-const shareButton =
-document.getElementById("shareButton");
-
-
-const homeButton =
-document.getElementById("homeButton");
-
-
-
-/* =====================================================
-   ESCENA
-===================================================== */
-
+/* ESCENA */
 
 const scene =
 new THREE.Scene();
-
 
 scene.background =
 new THREE.Color(0x202020);
 
 
 
-/* =====================================================
-   CAMARA
-===================================================== */
-
+/* CAMARA */
 
 const camera =
 new THREE.PerspectiveCamera(
@@ -345,12 +112,11 @@ new THREE.PerspectiveCamera(
   window.innerWidth /
   window.innerHeight,
 
-  0.001,
+  0.1,
 
-  1000000
+  100000
 
 );
-
 
 camera.position.set(
  100,
@@ -360,119 +126,69 @@ camera.position.set(
 
 
 
-/* =====================================================
-   RENDERER
-===================================================== */
+/* RENDERER */
 
+const renderer =
+new THREE.WebGLRenderer({
 
-let renderer;
+  antialias: true
 
+});
 
-try {
+renderer.setSize(
 
+  window.innerWidth,
 
-  renderer =
-    new THREE.WebGLRenderer({
-
-      antialias: true,
-
-      powerPreference:
-        "high-performance"
-
-    });
-
-
-  renderer.setPixelRatio(
-
-    Math.min(
-      window.devicePixelRatio || 1,
-      2
-    )
-
-  );
-
-
-  renderer.setSize(
-
-    window.innerWidth,
-
-    window.innerHeight
-
-  );
-
-
-  document
-    .getElementById("viewer")
-    .appendChild(
-      renderer.domElement
-    );
-
-
-}
-
-catch (error) {
-
-
-  console.error(error);
-
-
-  info.innerHTML =
-    "❌ Tu navegador no puede iniciar WebGL";
-
-
-  throw error;
-
-}
-
-
-
-/* =====================================================
-   LUCES
-===================================================== */
-
-
-const ambientLight =
-new THREE.AmbientLight(
-
-  0xffffff,
-
-  2
+  window.innerHeight
 
 );
 
+renderer.setPixelRatio(
+
+  Math.min(
+    window.devicePixelRatio,
+    2
+  )
+
+);
+
+document.body.appendChild(
+  renderer.domElement
+);
+
+
+
+/* LUCES */
 
 scene.add(
-  ambientLight
+
+  new THREE.AmbientLight(
+    0xffffff,
+    2
+  )
+
 );
 
 
-const directionalLight =
+const light =
 new THREE.DirectionalLight(
-
   0xffffff,
-
   2
-
 );
 
 
-directionalLight.position.set(
+light.position.set(
   1,
   1,
   1
 );
 
 
-scene.add(
-  directionalLight
-);
+scene.add(light);
 
 
 
-/* =====================================================
-   CONTROLES
-===================================================== */
-
+/* CONTROLES */
 
 const controls =
 new OrbitControls(
@@ -483,66 +199,23 @@ new OrbitControls(
 
 );
 
-
 controls.enableDamping =
 true;
 
 
-controls.dampingFactor =
-0.08;
 
-
-controls.enableZoom =
-true;
-
-
-controls.enablePan =
-true;
-
-
-controls.rotateSpeed =
-0.7;
-
-
-controls.zoomSpeed =
-1;
-
-
-
-/* =====================================================
-   STL
-===================================================== */
-
+/* STL */
 
 const loader =
 new STLLoader();
 
 
-let model = null;
 
-let modelSize = null;
-
-let wireframe = false;
-
-let colorIndex = 0;
-
-
-const colors = [
-
-  0xb0b0b0,
-  0x00aaff,
-  0xff5555,
-  0x55cc55,
-  0xffaa00,
-  0xffffff
-
-];
-
-
-
-/* =====================================================
-   LEER URL
-===================================================== */
+/*
+=====================================================
+OBTENER NOMBRE DEL STL DESDE LA URL
+=====================================================
+*/
 
 
 const params =
@@ -551,141 +224,264 @@ new URLSearchParams(
 );
 
 
-const modelo =
+const archivo =
 params.get("modelo");
 
 
 
-/* =====================================================
-   CARGAR STL
-===================================================== */
+if (!archivo) {
 
 
-async function cargarSTL() {
+  info.textContent =
+    "❌ No se indicó ningún STL";
 
 
-  if (!modelo) {
+}
+
+else {
 
 
-    info.innerHTML =
+  cargarSTL(archivo);
 
-      "Visor 3D STL<br>" +
-
-      "<small>" +
-      "Indica un modelo en la URL"
-      +
-      "</small>";
+}
 
 
-    return;
 
-  }
+/*
+=====================================================
+CARGAR STL
+=====================================================
+*/
 
 
-  const nombreArchivo =
-    decodeURIComponent(modelo);
+async function cargarSTL(nombre) {
+
+
+  info.textContent =
+    "⏳ Cargando " +
+    nombre +
+    "...";
 
 
   /*
-    encodeURI permite que funcionen
-    espacios y caracteres especiales,
-    pero conserva las barras.
+    encodeURIComponent solamente
+    para el nombre del archivo.
   */
 
 
   const url =
     "./" +
-    encodeURI(nombreArchivo);
+    nombre
+      .split("/")
+      .map(
+        parte =>
+          encodeURIComponent(parte)
+      )
+      .join("/");
 
 
   console.log(
-    "URL STL:",
+    "Cargando:",
     url
   );
-
-
-  info.textContent =
-    "⏳ Descargando STL...";
 
 
   try {
 
 
-    const response =
+    const respuesta =
       await fetch(url);
 
 
     console.log(
-      "Respuesta:",
-      response.status,
-      response.statusText
+      "HTTP:",
+      respuesta.status
     );
 
 
-    if (!response.ok) {
+    if (!respuesta.ok) {
 
       throw new Error(
 
         "HTTP " +
-        response.status
+        respuesta.status
 
       );
 
     }
+
+
+    const buffer =
+      await respuesta.arrayBuffer();
+
+
+    console.log(
+      "Bytes:",
+      buffer.byteLength
+    );
 
 
     info.textContent =
       "⏳ Procesando STL...";
 
 
-    const arrayBuffer =
-      await response.arrayBuffer();
-
-
-    console.log(
-      "Tamaño:",
-      arrayBuffer.byteLength,
-      "bytes"
-    );
-
-
-    if (
-      arrayBuffer.byteLength === 0
-    ) {
-
-      throw new Error(
-        "El archivo está vacío"
-      );
-
-    }
-
-
     const geometry =
       loader.parse(
-        arrayBuffer
+        buffer
       );
 
 
-    crearModelo(
-      geometry,
-      nombreArchivo
+    geometry.computeVertexNormals();
+
+
+    geometry.computeBoundingBox();
+
+
+    const box =
+      geometry.boundingBox;
+
+
+    const center =
+      new THREE.Vector3();
+
+
+    box.getCenter(
+      center
     );
+
+
+    const size =
+      new THREE.Vector3();
+
+
+    box.getSize(
+      size
+    );
+
+
+    /*
+    MODELO
+    */
+
+
+    const material =
+      new THREE.MeshStandardMaterial({
+
+        color: 0xb0b0b0,
+
+        roughness: 0.7,
+
+        metalness: 0.1
+
+      });
+
+
+    const model =
+      new THREE.Mesh(
+
+        geometry,
+
+        material
+
+      );
+
+
+    model.position.sub(
+      center
+    );
+
+
+    scene.add(model);
+
+
+
+    /*
+    CAMARA
+    */
+
+
+    const maxSize =
+      Math.max(
+
+        size.x,
+        size.y,
+        size.z
+
+      );
+
+
+    const distancia =
+      maxSize * 2.2;
+
+
+    camera.position.set(
+
+      distancia,
+      distancia,
+      distancia
+
+    );
+
+
+    camera.near =
+      maxSize / 10000;
+
+
+    camera.far =
+      maxSize * 100;
+
+
+    camera.updateProjectionMatrix();
+
+
+    controls.target.set(
+      0,
+      0,
+      0
+    );
+
+
+    controls.update();
+
+
+
+    /*
+    INFORMACION
+    */
+
+
+    info.innerHTML =
+
+      "📦 " +
+      nombre +
+      "<br>" +
+
+      "X: " +
+      size.x.toFixed(2) +
+      " | " +
+
+      "Y: " +
+      size.y.toFixed(2) +
+      " | " +
+
+      "Z: " +
+      size.z.toFixed(2);
+
 
 
   }
 
-  catch (error) {
+  catch(error) {
 
 
     console.error(
-      "ERROR STL:",
       error
     );
 
 
     info.innerHTML =
 
-      "❌ No se pudo cargar el STL<br>" +
+      "❌ ERROR<br>" +
 
       "<small>" +
       error.message +
@@ -697,441 +493,44 @@ async function cargarSTL() {
 
 
 
-/* =====================================================
-   CREAR MODELO
-===================================================== */
+/*
+=====================================================
+ANIMACION
+=====================================================
+*/
 
 
-function crearModelo(
-  geometry,
-  nombre
-) {
+function animate() {
 
 
-  geometry.computeVertexNormals();
-
-  geometry.computeBoundingBox();
-
-
-  const box =
-    geometry.boundingBox;
-
-
-  if (!box) {
-
-    throw new Error(
-      "El STL no contiene geometría"
-    );
-
-  }
-
-
-  const center =
-    new THREE.Vector3();
-
-
-  box.getCenter(center);
-
-
-  const size =
-    new THREE.Vector3();
-
-
-  box.getSize(size);
-
-
-  modelSize =
-    size.clone();
-
-
-  /*
-    Crear material
-  */
-
-
-  const material =
-    new THREE.MeshStandardMaterial({
-
-      color:
-        colors[colorIndex],
-
-      roughness:
-        0.65,
-
-      metalness:
-        0.1,
-
-      side:
-        THREE.DoubleSide
-
-    });
-
-
-  /*
-    Crear modelo
-  */
-
-
-  model =
-    new THREE.Mesh(
-
-      geometry,
-
-      material
-
-    );
-
-
-  /*
-    Centrar
-  */
-
-
-  model.position.sub(center);
-
-
-  scene.add(
-    model
-  );
-
-
-  /*
-    Información
-  */
-
-
-  info.textContent =
-    "📦 " + nombre;
-
-
-  dimensions.innerHTML =
-
-    "<b>Dimensiones</b><br>" +
-
-    "X: " +
-    size.x.toFixed(2) +
-    " mm<br>" +
-
-    "Y: " +
-    size.y.toFixed(2) +
-    " mm<br>" +
-
-    "Z: " +
-    size.z.toFixed(2) +
-    " mm";
-
-
-  dimensions.style.display =
-    "block";
-
-
-  ajustarCamara(
-    size
-  );
-
-
-}
-
-
-
-/* =====================================================
-   CAMARA
-===================================================== */
-
-
-function ajustarCamara(size) {
-
-
-  if (!size) {
-    return;
-  }
-
-
-  const maxSize =
-    Math.max(
-
-      size.x,
-      size.y,
-      size.z
-
-    );
-
-
-  if (
-    !isFinite(maxSize) ||
-    maxSize <= 0
-  ) {
-
-    return;
-
-  }
-
-
-  const distancia =
-    maxSize * 2.2;
-
-
-  camera.position.set(
-
-    distancia,
-    distancia,
-    distancia
-
-  );
-
-
-  camera.near =
-    Math.max(
-      maxSize / 10000,
-      0.001
-    );
-
-
-  camera.far =
-    Math.max(
-      maxSize * 100,
-      1000
-    );
-
-
-  camera.updateProjectionMatrix();
-
-
-  controls.target.set(
-    0,
-    0,
-    0
+  requestAnimationFrame(
+    animate
   );
 
 
   controls.update();
 
+
+  renderer.render(
+
+    scene,
+
+    camera
+
+  );
+
 }
 
 
+animate();
 
-/* =====================================================
-   MENU
-===================================================== */
 
 
-menuButton.addEventListener(
-
-  "click",
-
-  () => {
-
-
-    menuPanel.style.display =
-
-      menuPanel.style.display ===
-      "block"
-
-      ? "none"
-
-      : "block";
-
-  }
-
-);
-
-
-
-/* =====================================================
-   CENTRAR
-===================================================== */
-
-
-resetButton.addEventListener(
-
-  "click",
-
-  () => {
-
-    ajustarCamara(
-      modelSize
-    );
-
-  }
-
-);
-
-
-
-/* =====================================================
-   WIREFRAME
-===================================================== */
-
-
-wireButton.addEventListener(
-
-  "click",
-
-  () => {
-
-
-    if (!model) {
-      return;
-    }
-
-
-    wireframe =
-      !wireframe;
-
-
-    model.material.wireframe =
-      wireframe;
-
-
-    wireButton.textContent =
-
-      wireframe
-
-      ? "🕸️ Vista sólida"
-
-      : "🕸️ Wireframe";
-
-  }
-
-);
-
-
-
-/* =====================================================
-   COLOR
-===================================================== */
-
-
-colorButton.addEventListener(
-
-  "click",
-
-  () => {
-
-
-    if (!model) {
-      return;
-    }
-
-
-    colorIndex++;
-
-
-    if (
-      colorIndex >=
-      colors.length
-    ) {
-
-      colorIndex = 0;
-
-    }
-
-
-    model.material.color.setHex(
-
-      colors[colorIndex]
-
-    );
-
-  }
-
-);
-
-
-
-/* =====================================================
-   COMPARTIR
-===================================================== */
-
-
-shareButton.addEventListener(
-
-  "click",
-
-  async () => {
-
-
-    const url =
-      window.location.href;
-
-
-    try {
-
-
-      if (
-        navigator.share
-      ) {
-
-
-        await navigator.share({
-
-          title:
-            "Visor 3D STL",
-
-          text:
-            "Visualiza este modelo 3D",
-
-          url:
-            url
-
-        });
-
-
-      }
-
-      else {
-
-
-        await navigator.clipboard
-          .writeText(url);
-
-
-        alert(
-          "Enlace copiado"
-        );
-
-      }
-
-    }
-
-    catch(error) {
-
-      console.log(
-        "Compartir cancelado"
-      );
-
-    }
-
-  }
-
-);
-
-
-
-/* =====================================================
-   INICIO
-===================================================== */
-
-
-homeButton.addEventListener(
-
-  "click",
-
-  () => {
-
-
-    window.location.href =
-      window.location.pathname;
-
-  }
-
-);
-
-
-
-/* =====================================================
-   RESIZE
-===================================================== */
+/*
+=====================================================
+RESIZE
+=====================================================
+*/
 
 
 window.addEventListener(
@@ -1158,51 +557,10 @@ window.addEventListener(
 
     );
 
+
   }
 
 );
-
-
-
-/* =====================================================
-   ANIMACION
-===================================================== */
-
-
-function animate() {
-
-
-  requestAnimationFrame(
-    animate
-  );
-
-
-  controls.update();
-
-
-  renderer.render(
-    scene,
-    camera
-  );
-
-
-}
-
-
-animate();
-
-
-
-/* =====================================================
-   INICIAR
-===================================================== */
-
-
-info.textContent =
-"Visor iniciado. Cargando modelo...";
-
-
-cargarSTL();
 
 
 </script>
