@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 
@@ -11,17 +12,21 @@
                maximum-scale=1.0,
                user-scalable=no">
 
-<title>Visor STL 3D</title>
+<title>Visor 3D STL</title>
 
 <style>
+
+* {
+  box-sizing: border-box;
+}
 
 html,
 body {
 
   margin: 0;
+  padding: 0;
 
   width: 100%;
-
   height: 100%;
 
   overflow: hidden;
@@ -31,14 +36,17 @@ body {
   font-family: Arial, sans-serif;
 
   touch-action: none;
-
 }
 
 
 #viewer {
 
-  width: 100%;
+  position: fixed;
 
+  top: 0;
+  left: 0;
+
+  width: 100%;
   height: 100%;
 
 }
@@ -49,82 +57,101 @@ body {
   position: fixed;
 
   top: 0;
-
   left: 0;
-
   right: 0;
 
   z-index: 10;
 
-  padding: 12px;
+  padding: 12px 15px;
 
   text-align: center;
 
   color: white;
 
-  background: rgba(0,0,0,0.75);
+  background: rgba(0,0,0,0.78);
 
   font-size: 14px;
 
+  min-height: 45px;
+
 }
 
 
-#controls {
+#menu {
 
   position: fixed;
 
-  bottom: 20px;
-
-  left: 50%;
-
-  transform: translateX(-50%);
+  top: 60px;
+  left: 10px;
 
   z-index: 20;
-
-  display: flex;
-
-  gap: 8px;
-
-  flex-wrap: wrap;
-
-  justify-content: center;
-
-  width: 95%;
 
 }
 
 
-button {
+#menuButton {
+
+  width: 45px;
+  height: 45px;
 
   border: none;
 
   border-radius: 12px;
 
-  padding: 12px 16px;
+  background: rgba(0,0,0,0.75);
 
-  background: #ffffff;
+  color: white;
+
+  font-size: 22px;
+
+  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+
+}
+
+
+#menuPanel {
+
+  display: none;
+
+  margin-top: 8px;
+
+  padding: 10px;
+
+  width: 210px;
+
+  border-radius: 12px;
+
+  background: rgba(0,0,0,0.85);
+
+}
+
+
+#menuPanel button {
+
+  display: block;
+
+  width: 100%;
+
+  margin-bottom: 8px;
+
+  padding: 12px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: white;
 
   color: #222;
 
-  font-size: 14px;
-
   font-weight: bold;
 
-  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-
 }
 
 
-button:active {
+#menuPanel button:last-child {
 
-  transform: scale(0.95);
-
-}
-
-
-input[type="file"] {
-
-  display: none;
+  margin-bottom: 0;
 
 }
 
@@ -135,21 +162,52 @@ input[type="file"] {
 
   left: 10px;
 
-  bottom: 20px;
+  bottom: 15px;
 
   z-index: 10;
 
-  color: white;
+  display: none;
 
-  background: rgba(0,0,0,0.7);
-
-  padding: 10px;
+  padding: 10px 12px;
 
   border-radius: 10px;
 
+  color: white;
+
+  background: rgba(0,0,0,0.75);
+
   font-size: 13px;
 
+  line-height: 1.5;
+
+}
+
+
+#shareMessage {
+
+  position: fixed;
+
+  left: 50%;
+
+  bottom: 20px;
+
+  transform: translateX(-50%);
+
+  z-index: 30;
+
   display: none;
+
+  padding: 12px 18px;
+
+  border-radius: 12px;
+
+  color: white;
+
+  background: #111;
+
+  font-size: 14px;
+
+  white-space: nowrap;
 
 }
 
@@ -162,65 +220,71 @@ input[type="file"] {
 <body>
 
 
-<div id="info">
-
-  Selecciona un archivo STL para comenzar
-
-</div>
-
-
 <div id="viewer"></div>
+
+
+<div id="info">
+  Cargando visor...
+</div>
 
 
 <div id="dimensions"></div>
 
 
-<div id="controls">
+<div id="shareMessage">
+  Enlace copiado
+</div>
 
 
-  <label for="fileInput">
+<div id="menu">
 
-    <button type="button"
-            onclick="document.getElementById('fileInput').click()">
 
-      📂 Abrir STL
+  <button id="menuButton">
+    ☰
+  </button>
 
+
+  <div id="menuPanel">
+
+
+    <button id="resetButton">
+      🔄 Centrar modelo
     </button>
 
-  </label>
+
+    <button id="wireButton">
+      🕸️ Wireframe
+    </button>
 
 
-  <input
-    id="fileInput"
-    type="file"
-    accept=".stl,model/stl">
+    <button id="colorButton">
+      🎨 Cambiar color
+    </button>
 
 
-  <button id="resetButton">
-
-    🔄 Centrar
-
-  </button>
+    <button id="shareButton">
+      🔗 Compartir modelo
+    </button>
 
 
-  <button id="wireButton">
-
-    🕸️ Wireframe
-
-  </button>
+    <button id="homeButton">
+      🏠 Ver modelos
+    </button>
 
 
-  <button id="colorButton">
-
-    🎨 Color
-
-  </button>
+  </div>
 
 
 </div>
 
 
+
 <script type="module">
+
+
+/* =====================================================
+   THREE.JS
+===================================================== */
 
 
 import * as THREE from
@@ -233,6 +297,52 @@ import { OrbitControls } from
 
 import { STLLoader } from
 'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/STLLoader.js';
+
+
+
+/* =====================================================
+   ELEMENTOS
+===================================================== */
+
+
+const info =
+document.getElementById("info");
+
+
+const dimensions =
+document.getElementById("dimensions");
+
+
+const menuButton =
+document.getElementById("menuButton");
+
+
+const menuPanel =
+document.getElementById("menuPanel");
+
+
+const resetButton =
+document.getElementById("resetButton");
+
+
+const wireButton =
+document.getElementById("wireButton");
+
+
+const colorButton =
+document.getElementById("colorButton");
+
+
+const shareButton =
+document.getElementById("shareButton");
+
+
+const homeButton =
+document.getElementById("homeButton");
+
+
+const shareMessage =
+document.getElementById("shareMessage");
 
 
 
@@ -263,7 +373,7 @@ new THREE.PerspectiveCamera(
   window.innerWidth /
   window.innerHeight,
 
-  0.01,
+  0.001,
 
   1000000
 
@@ -296,7 +406,7 @@ new THREE.WebGLRenderer({
 renderer.setPixelRatio(
 
   Math.min(
-    window.devicePixelRatio,
+    window.devicePixelRatio || 1,
     2
   )
 
@@ -328,7 +438,7 @@ new THREE.AmbientLight(
 
   0xffffff,
 
-  2
+  1.8
 
 );
 
@@ -336,7 +446,7 @@ new THREE.AmbientLight(
 scene.add(ambientLight);
 
 
-const directionalLight =
+const light1 =
 new THREE.DirectionalLight(
 
   0xffffff,
@@ -346,16 +456,34 @@ new THREE.DirectionalLight(
 );
 
 
-directionalLight.position.set(
+light1.position.set(
+ 1,
+ 1,
+ 1
+);
 
-  1,
-  1,
+
+scene.add(light1);
+
+
+const light2 =
+new THREE.DirectionalLight(
+
+  0xffffff,
+
   1
 
 );
 
 
-scene.add(directionalLight);
+light2.position.set(
+ -1,
+ -1,
+ -1
+);
+
+
+scene.add(light2);
 
 
 
@@ -374,22 +502,33 @@ new OrbitControls(
 );
 
 
-controls.enableDamping = true;
+controls.enableDamping =
+true;
 
-controls.dampingFactor = 0.08;
 
-controls.enablePan = true;
+controls.dampingFactor =
+0.08;
 
-controls.enableZoom = true;
 
-controls.rotateSpeed = 0.7;
+controls.enableZoom =
+true;
 
-controls.zoomSpeed = 1.0;
+
+controls.enablePan =
+true;
+
+
+controls.rotateSpeed =
+0.7;
+
+
+controls.zoomSpeed =
+1.0;
 
 
 
 /* =====================================================
-   STL LOADER
+   VARIABLES DEL MODELO
 ===================================================== */
 
 
@@ -399,143 +538,175 @@ new STLLoader();
 
 let model = null;
 
-let originalMaterial = null;
+let modelGeometry = null;
+
+let modelMaterial = null;
 
 let modelSize = null;
 
+let wireframe = false;
+
+let colorIndex = 0;
 
 
-/* =====================================================
-   ELEMENTOS HTML
-===================================================== */
 
+const colors = [
 
-const info =
-document.getElementById("info");
+  0xb0b0b0,
 
+  0x00aaff,
 
-const dimensions =
-document.getElementById("dimensions");
+  0xff5555,
 
+  0x55cc55,
 
-const fileInput =
-document.getElementById("fileInput");
+  0xffaa00,
 
+  0xffffff
 
-const resetButton =
-document.getElementById("resetButton");
-
-
-const wireButton =
-document.getElementById("wireButton");
-
-
-const colorButton =
-document.getElementById("colorButton");
+];
 
 
 
 /* =====================================================
-   CARGAR STL
+   OBTENER MODELO DESDE LA URL
 ===================================================== */
 
 
-fileInput.addEventListener(
-
-  "change",
-
-  function(event) {
-
-
-    const file =
-    event.target.files[0];
+const params =
+new URLSearchParams(
+  window.location.search
+);
 
 
-    if (!file) {
-
-      return;
-
-    }
+const modelo =
+params.get("modelo");
 
 
-    if (
-      !file.name
-      .toLowerCase()
-      .endsWith(".stl")
-    ) {
 
-      info.textContent =
-      "❌ El archivo no es un STL";
+/* =====================================================
+   CARGAR MODELO
+===================================================== */
 
-      return;
 
-    }
+function cargarModelo() {
+
+
+  if (!modelo) {
 
 
     info.textContent =
-    "⏳ Cargando " +
-    file.name +
-    "...";
+      "Visor 3D — falta indicar un modelo";
 
 
-    const reader =
-    new FileReader();
+    mostrarAyuda();
 
 
-    reader.onload = function(e) {
-
-
-      try {
-
-
-        const geometry =
-        loader.parse(
-          e.target.result
-        );
-
-
-        cargarModelo(
-
-          geometry,
-
-          file
-
-        );
-
-
-      }
-
-      catch(error) {
-
-
-        console.error(error);
-
-
-        info.textContent =
-        "❌ Error al leer el STL";
-
-
-      }
-
-    };
-
-
-    reader.onerror = function() {
-
-
-      info.textContent =
-      "❌ No se pudo leer el archivo";
-
-
-    };
-
-
-    reader.readAsArrayBuffer(file);
-
+    return;
 
   }
 
-);
+
+  /*
+    IMPORTANTE:
+
+    El nombre que aparece después de
+    ?modelo= debe coincidir con el
+    nombre del STL que tengas en GitHub.
+  */
+
+
+  const archivo =
+    decodeURIComponent(modelo);
+
+
+  const url =
+    "./" + archivo;
+
+
+  info.textContent =
+    "⏳ Cargando " + archivo + "...";
+
+
+  loader.load(
+
+    url,
+
+
+    function(geometry) {
+
+
+      console.log(
+        "STL cargado:",
+        url
+      );
+
+
+      crearModelo(
+
+        geometry,
+
+        archivo
+
+      );
+
+
+    },
+
+
+    function(xhr) {
+
+
+      if (xhr.total) {
+
+
+        const porcentaje =
+          Math.round(
+
+            xhr.loaded /
+            xhr.total *
+            100
+
+          );
+
+
+        info.textContent =
+
+          "⏳ Cargando " +
+          archivo +
+          " — " +
+          porcentaje +
+          "%";
+
+
+      }
+
+    },
+
+
+    function(error) {
+
+
+      console.error(
+        "Error cargando STL:",
+        error
+      );
+
+
+      info.innerHTML =
+
+        "❌ No se pudo cargar el modelo<br>" +
+
+        "<small>" +
+        archivo +
+        "</small>";
+
+
+    }
+
+  );
+
+}
 
 
 
@@ -544,9 +715,9 @@ fileInput.addEventListener(
 ===================================================== */
 
 
-function cargarModelo(
+function crearModelo(
   geometry,
-  file
+  nombre
 ) {
 
 
@@ -556,74 +727,86 @@ function cargarModelo(
 
     scene.remove(model);
 
-    model.geometry.dispose();
+    if (model.geometry) {
 
-    model.material.dispose();
+      model.geometry.dispose();
 
-    model = null;
+    }
+
+    if (model.material) {
+
+      model.material.dispose();
+
+    }
 
   }
 
 
-  /* Calcular normales */
+  modelGeometry =
+    geometry;
+
 
   geometry.computeVertexNormals();
 
-
-  /* Bounding box */
 
   geometry.computeBoundingBox();
 
 
   const box =
-  geometry.boundingBox;
+    geometry.boundingBox;
 
 
   const center =
-  new THREE.Vector3();
+    new THREE.Vector3();
 
 
   box.getCenter(center);
 
 
   const size =
-  new THREE.Vector3();
+    new THREE.Vector3();
 
 
   box.getSize(size);
 
 
   modelSize =
-  size.clone();
+    size.clone();
 
 
   /* Material */
 
-  originalMaterial =
-  new THREE.MeshStandardMaterial({
+  modelMaterial =
+    new THREE.MeshStandardMaterial({
 
-    color: 0xb0b0b0,
+      color: colors[colorIndex],
 
-    roughness: 0.65,
+      roughness: 0.65,
 
-    metalness: 0.1
+      metalness: 0.1,
 
-  });
+      side: THREE.DoubleSide
+
+    });
 
 
-  /* Mesh */
+  /* Modelo */
 
   model =
-  new THREE.Mesh(
+    new THREE.Mesh(
 
-    geometry,
+      geometry,
 
-    originalMaterial
+      modelMaterial
 
-  );
+    );
 
 
-  /* Centrar modelo */
+  /*
+    Centramos el modelo para que
+    el OrbitControls funcione bien.
+  */
+
 
   model.position.sub(center);
 
@@ -631,44 +814,31 @@ function cargarModelo(
   scene.add(model);
 
 
-  /* =================================================
-     INFORMACION
-  ================================================= */
-
-
-  const sizeX =
-  size.x.toFixed(2);
-
-
-  const sizeY =
-  size.y.toFixed(2);
-
-
-  const sizeZ =
-  size.z.toFixed(2);
-
-
-  const sizeKB =
-  (file.size / 1024).toFixed(1);
-
+  /* Información */
 
   info.textContent =
-  "📦 " + file.name;
+    "📦 " + nombre;
 
 
   dimensions.innerHTML =
 
-  "X: " + sizeX + "<br>" +
+    "<b>Dimensiones</b><br>" +
 
-  "Y: " + sizeY + "<br>" +
+    "X: " +
+    size.x.toFixed(2) +
+    " mm<br>" +
 
-  "Z: " + sizeZ + "<br>" +
+    "Y: " +
+    size.y.toFixed(2) +
+    " mm<br>" +
 
-  "Archivo: " + sizeKB + " KB";
+    "Z: " +
+    size.z.toFixed(2) +
+    " mm";
 
 
   dimensions.style.display =
-  "block";
+    "block";
 
 
   /* Centrar cámara */
@@ -688,68 +858,107 @@ function cargarModelo(
 function ajustarCamara(size) {
 
 
+  if (!size) {
+
+    return;
+
+  }
+
+
   const maxSize =
-  Math.max(
+    Math.max(
 
-    size.x,
+      size.x,
 
-    size.y,
+      size.y,
 
-    size.z
+      size.z
 
-  );
+    );
 
 
-  const distance =
-  maxSize * 2.2;
+  const distancia =
+    maxSize * 2.2;
 
 
   camera.position.set(
 
-    distance,
+    distancia,
 
-    distance,
+    distancia,
 
-    distance
+    distancia
 
   );
 
 
   camera.near =
-  Math.max(
-    maxSize / 10000,
-    0.001
-  );
+    Math.max(
+      maxSize / 10000,
+      0.001
+    );
 
 
   camera.far =
-  Math.max(
-    maxSize * 100,
-    1000
-  );
+    Math.max(
+      maxSize * 100,
+      1000
+    );
 
 
   camera.updateProjectionMatrix();
 
 
   controls.target.set(
-
     0,
     0,
     0
-
   );
 
 
   controls.update();
-
 
 }
 
 
 
 /* =====================================================
-   BOTON CENTRAR
+   MENU
+===================================================== */
+
+
+menuButton.addEventListener(
+
+  "click",
+
+  function() {
+
+
+    if (
+      menuPanel.style.display ===
+      "block"
+    ) {
+
+      menuPanel.style.display =
+        "none";
+
+    }
+
+    else {
+
+      menuPanel.style.display =
+        "block";
+
+    }
+
+  }
+
+);
+
+
+
+/* =====================================================
+   CENTRAR
 ===================================================== */
 
 
@@ -758,13 +967,6 @@ resetButton.addEventListener(
   "click",
 
   function() {
-
-
-    if (!model || !modelSize) {
-
-      return;
-
-    }
 
 
     ajustarCamara(modelSize);
@@ -779,9 +981,6 @@ resetButton.addEventListener(
 /* =====================================================
    WIREFRAME
 ===================================================== */
-
-
-let wireframe = false;
 
 
 wireButton.addEventListener(
@@ -799,20 +998,20 @@ wireButton.addEventListener(
 
 
     wireframe =
-    !wireframe;
+      !wireframe;
 
 
     model.material.wireframe =
-    wireframe;
+      wireframe;
 
 
     wireButton.textContent =
 
       wireframe
 
-      ? "🕸️ Sólido"
+        ? "🕸️ Vista sólida"
 
-      : "🕸️ Wireframe";
+        : "🕸️ Wireframe";
 
 
   }
@@ -824,26 +1023,6 @@ wireButton.addEventListener(
 /* =====================================================
    CAMBIAR COLOR
 ===================================================== */
-
-
-const colores = [
-
-  0xb0b0b0,
-
-  0x00aaff,
-
-  0xff5555,
-
-  0x55cc55,
-
-  0xffaa00,
-
-  0xffffff
-
-];
-
-
-let colorIndex = 0;
 
 
 colorButton.addEventListener(
@@ -864,7 +1043,7 @@ colorButton.addEventListener(
 
 
     if (
-      colorIndex >= colores.length
+      colorIndex >= colors.length
     ) {
 
       colorIndex = 0;
@@ -874,14 +1053,165 @@ colorButton.addEventListener(
 
     model.material.color.setHex(
 
-      colores[colorIndex]
+      colors[colorIndex]
 
     );
+
+  }
+
+);
+
+
+
+/* =====================================================
+   COMPARTIR
+===================================================== */
+
+
+shareButton.addEventListener(
+
+  "click",
+
+  async function() {
+
+
+    const url =
+      window.location.href;
+
+
+    try {
+
+
+      if (
+        navigator.share
+      ) {
+
+
+        await navigator.share({
+
+          title:
+            "Visor 3D",
+
+          text:
+            "Visualiza este modelo 3D",
+
+          url:
+            url
+
+        });
+
+
+      }
+
+      else {
+
+
+        await navigator.clipboard.writeText(
+          url
+        );
+
+
+        mostrarMensaje(
+          "🔗 Enlace copiado"
+        );
+
+
+      }
+
+    }
+
+    catch(error) {
+
+
+      console.log(
+        "Compartir cancelado"
+      );
+
+
+    }
+
+  }
+
+);
+
+
+
+/* =====================================================
+   VOLVER AL INICIO
+===================================================== */
+
+
+homeButton.addEventListener(
+
+  "click",
+
+  function() {
+
+
+    window.location.href =
+      window.location.pathname;
 
 
   }
 
 );
+
+
+
+/* =====================================================
+   MENSAJE
+===================================================== */
+
+
+function mostrarMensaje(texto) {
+
+
+  shareMessage.textContent =
+    texto;
+
+
+  shareMessage.style.display =
+    "block";
+
+
+  setTimeout(
+
+    function() {
+
+      shareMessage.style.display =
+        "none";
+
+    },
+
+    2000
+
+  );
+
+}
+
+
+
+/* =====================================================
+   AYUDA SI NO HAY MODELO
+===================================================== */
+
+
+function mostrarAyuda() {
+
+
+  dimensions.style.display =
+    "block";
+
+
+  dimensions.innerHTML =
+
+    "<b>Cómo abrir un modelo</b><br><br>" +
+
+    "Agrega el nombre del STL en la URL:<br><br>" +
+
+    "?modelo=ventaja.stl";
+
+}
 
 
 
@@ -913,7 +1243,6 @@ window.addEventListener(
       window.innerHeight
 
     );
-
 
   }
 
@@ -952,9 +1281,18 @@ function animate() {
 animate();
 
 
-</script>
 
+/* =====================================================
+   INICIAR
+===================================================== */
+
+
+cargarModelo();
+
+
+</script>
 
 </body>
 
 </html>
+```
