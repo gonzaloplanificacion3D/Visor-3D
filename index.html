@@ -7,16 +7,18 @@
   <title>Visor 3D</title>
 
   <style>
-    * {
-      box-sizing: border-box;
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #202020;
+      font-family: Arial, sans-serif;
     }
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: white;
-      overflow: hidden;
+    #viewer {
+      width: 100%;
+      height: 100%;
     }
 
     #info {
@@ -25,135 +27,102 @@
       left: 0;
       right: 0;
       z-index: 10;
-      padding: 12px 16px;
-      background: rgba(20, 20, 20, 0.9);
+      padding: 14px;
       text-align: center;
-      font-size: 16px;
-    }
-
-    #viewer {
-      width: 100vw;
-      height: 100vh;
-    }
-
-    #loading {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 20;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 20px 30px;
-      border-radius: 10px;
-      display: none;
+      color: white;
+      background: rgba(0,0,0,0.75);
     }
   </style>
 </head>
 
 <body>
 
-  <div id="info">Cargando modelo 3D...</div>
-  <div id="loading">Cargando STL...</div>
-  <div id="viewer"></div>
+<div id="info">Cargando modelo 3D...</div>
+<div id="viewer"></div>
 
-  <script type="module">
+<script type="module">
 
-    import * as THREE from
-      'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
+import * as THREE from
+'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 
-    import { OrbitControls } from
-      'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js';
+import { OrbitControls } from
+'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js';
 
-    import { STLLoader } from
-      'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/STLLoader.js';
-
-
-    const scene = new THREE.Scene();
-
-    scene.background = new THREE.Color(0x202020);
+import { STLLoader } from
+'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/STLLoader.js';
 
 
-    const camera = new THREE.PerspectiveCamera(
-      45,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      100000
-    );
+const scene = new THREE.Scene();
+
+scene.background = new THREE.Color(0x202020);
 
 
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true
-    });
-
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    document
-      .getElementById("viewer")
-      .appendChild(renderer.domElement);
+const camera = new THREE.PerspectiveCamera(
+    45,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    100000
+);
 
 
-    // Luces
+const renderer = new THREE.WebGLRenderer({
+    antialias: true
+});
 
-    const light1 = new THREE.DirectionalLight(0xffffff, 2);
-    light1.position.set(1, 1, 1);
-    scene.add(light1);
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
 
-
-    const light2 = new THREE.DirectionalLight(0xffffff, 1);
-    light2.position.set(-1, -1, -1);
-    scene.add(light2);
-
-
-    const ambient = new THREE.AmbientLight(0xffffff, 1);
-    scene.add(ambient);
-
-
-    // Controles de navegación
-
-    const controls = new OrbitControls(
-      camera,
-      renderer.domElement
-    );
-
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-
-    controls.screenSpacePanning = true;
+document
+    .getElementById("viewer")
+    .appendChild(renderer.domElement);
 
 
-    // Cargar STL
+// Luces
 
-    const loader = new STLLoader();
+const ambientLight = new THREE.AmbientLight(
+    0xffffff,
+    1.5
+);
 
-    const modelUrl = "ventaja.stl";
-
-    document.getElementById("loading").style.display = "block";
-
-
-    loader.load(
-
-      modelUrl,
-
-      function (geometry) {
-
-        const material = new THREE.MeshStandardMaterial({
-          color: 0xaaaaaa,
-          metalness: 0.1,
-          roughness: 0.7
-        });
+scene.add(ambientLight);
 
 
-        const model = new THREE.Mesh(
-          geometry,
-          material
-        );
+const directionalLight = new THREE.DirectionalLight(
+    0xffffff,
+    2
+);
+
+directionalLight.position.set(1, 1, 1);
+
+scene.add(directionalLight);
 
 
-        scene.add(model);
+// Controles
+
+const controls = new OrbitControls(
+    camera,
+    renderer.domElement
+);
+
+controls.enableDamping = true;
 
 
-        // Centrar modelo
+// STL
+
+const loader = new STLLoader();
+
+const modelUrl =
+"Ana Maria Cabello-21-08-2026.stl";
+
+
+loader.load(
+
+    modelUrl,
+
+    function(geometry) {
 
         geometry.computeBoundingBox();
 
@@ -163,99 +132,125 @@
 
         box.getCenter(center);
 
-        model.position.sub(center);
-
-
-        // Ajustar cámara
 
         const size = new THREE.Vector3();
 
         box.getSize(size);
 
-        const maxDimension = Math.max(
-          size.x,
-          size.y,
-          size.z
+
+        const model = new THREE.Mesh(
+
+            geometry,
+
+            new THREE.MeshStandardMaterial({
+                color: 0xb0b0b0,
+                roughness: 0.7,
+                metalness: 0.1
+            })
+
+        );
+
+
+        scene.add(model);
+
+
+        model.position.sub(center);
+
+
+        const maxSize = Math.max(
+            size.x,
+            size.y,
+            size.z
         );
 
 
         camera.position.set(
-          maxDimension * 1.5,
-          maxDimension * 1.5,
-          maxDimension * 1.5
+            maxSize * 1.5,
+            maxSize * 1.5,
+            maxSize * 1.5
         );
 
 
-        camera.lookAt(0, 0, 0);
+        camera.lookAt(0,0,0);
 
-        controls.target.set(0, 0, 0);
+        controls.target.set(0,0,0);
 
         controls.update();
 
 
-        document.getElementById("loading").style.display = "none";
-
-        document.getElementById("info").textContent =
-          "Visor 3D — mueve el modelo con el dedo o mouse";
+        document.getElementById("info").innerText =
+        "Visor 3D — mueve con el dedo o mouse";
 
 
-      },
+    },
 
-      undefined,
+    function(xhr) {
 
-      function (error) {
+        if (xhr.total) {
 
-        document.getElementById("loading").style.display = "none";
+            const percent =
+            Math.round(
+                xhr.loaded / xhr.total * 100
+            );
 
-        document.getElementById("info").textContent =
-          "No se pudo cargar el modelo STL.";
+            document.getElementById("info").innerText =
+            "Cargando modelo 3D... " + percent + "%";
+
+        }
+
+    },
+
+    function(error) {
 
         console.error(error);
 
-      }
+        document.getElementById("info").innerText =
+        "ERROR: no se pudo cargar el archivo STL.";
 
-    );
+    }
+
+);
 
 
-    // Adaptación a celular / ventana
+// Ajustar ventana
 
-    window.addEventListener(
-      "resize",
-      function () {
+window.addEventListener(
+    "resize",
+    function() {
 
         camera.aspect =
-          window.innerWidth /
-          window.innerHeight;
+        window.innerWidth /
+        window.innerHeight;
 
         camera.updateProjectionMatrix();
 
         renderer.setSize(
-          window.innerWidth,
-          window.innerHeight
+            window.innerWidth,
+            window.innerHeight
         );
 
-      }
-    );
+    }
+);
 
 
-    // Animación
+// Animación
 
-    function animate() {
+function animate() {
 
-      requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
 
-      controls.update();
+    controls.update();
 
-      renderer.render(
+    renderer.render(
         scene,
         camera
-      );
+    );
 
-    }
+}
 
-    animate();
+animate();
 
-  </script>
+</script>
 
 </body>
 </html>
