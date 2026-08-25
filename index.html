@@ -7,9 +7,17 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no">
 
-<title>Prueba STL</title>
+<title>Visor 3D STL</title>
+
+
+<!-- =====================================================
+     IMPORT MAP
+===================================================== -->
 
 <script type="importmap">
 {
@@ -20,12 +28,22 @@ content="width=device-width, initial-scale=1.0">
 }
 </script>
 
+
 <style>
+
+/* =====================================================
+   GENERAL
+===================================================== */
+
+* {
+  box-sizing: border-box;
+}
 
 html,
 body {
 
   margin: 0;
+  padding: 0;
 
   width: 100%;
   height: 100%;
@@ -38,6 +56,33 @@ body {
 
 }
 
+body {
+
+  touch-action: none;
+
+}
+
+
+/* =====================================================
+   VISOR
+===================================================== */
+
+#viewer {
+
+  position: fixed;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+}
+
+
+/* =====================================================
+   INFORMACION SUPERIOR
+===================================================== */
+
 #info {
 
   position: fixed;
@@ -48,13 +93,202 @@ body {
 
   z-index: 10;
 
-  padding: 15px;
-
-  background: black;
+  padding: 10px 15px;
 
   color: white;
 
+  background: rgba(0,0,0,0.82);
+
   text-align: center;
+
+  font-size: 14px;
+
+  min-height: 44px;
+
+}
+
+
+/* =====================================================
+   MENU
+===================================================== */
+
+#menu {
+
+  position: fixed;
+
+  top: 58px;
+  left: 10px;
+
+  z-index: 20;
+
+}
+
+
+#menuButton {
+
+  width: 48px;
+  height: 48px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: rgba(0,0,0,0.82);
+
+  color: white;
+
+  font-size: 22px;
+
+  box-shadow:
+    0 3px 10px rgba(0,0,0,0.4);
+
+}
+
+
+#menuPanel {
+
+  display: none;
+
+  width: 220px;
+
+  margin-top: 8px;
+
+  padding: 10px;
+
+  border-radius: 12px;
+
+  background: rgba(0,0,0,0.92);
+
+  box-shadow:
+    0 5px 20px rgba(0,0,0,0.5);
+
+}
+
+
+#menuPanel button {
+
+  display: block;
+
+  width: 100%;
+
+  margin-bottom: 8px;
+
+  padding: 13px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: white;
+
+  color: #222;
+
+  font-size: 14px;
+
+  font-weight: bold;
+
+}
+
+
+#menuPanel button:last-child {
+
+  margin-bottom: 0;
+
+}
+
+
+/* =====================================================
+   DIMENSIONES
+===================================================== */
+
+#dimensions {
+
+  position: fixed;
+
+  left: 10px;
+  bottom: 15px;
+
+  z-index: 10;
+
+  display: none;
+
+  padding: 10px 13px;
+
+  border-radius: 10px;
+
+  background: rgba(0,0,0,0.78);
+
+  color: white;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+
+}
+
+
+/* =====================================================
+   MENSAJE
+===================================================== */
+
+#message {
+
+  position: fixed;
+
+  left: 50%;
+  bottom: 20px;
+
+  transform: translateX(-50%);
+
+  z-index: 50;
+
+  display: none;
+
+  padding: 12px 18px;
+
+  border-radius: 12px;
+
+  background: rgba(0,0,0,0.9);
+
+  color: white;
+
+  font-size: 14px;
+
+  white-space: nowrap;
+
+}
+
+
+/* =====================================================
+   BOTON CERRAR MENU
+===================================================== */
+
+#closeMenu {
+
+  background: #333 !important;
+
+  color: white !important;
+
+}
+
+
+/* =====================================================
+   PC
+===================================================== */
+
+@media (min-width: 700px) {
+
+  #info {
+
+    font-size: 15px;
+
+  }
+
+  #dimensions {
+
+    font-size: 14px;
+
+  }
 
 }
 
@@ -66,12 +300,117 @@ body {
 <body>
 
 
+<!-- =====================================================
+     VISOR
+===================================================== -->
+
+<div id="viewer"></div>
+
+
+<!-- =====================================================
+     INFORMACION
+===================================================== -->
+
 <div id="info">
-Cargando visor...
+
+  Cargando visor...
+
 </div>
 
 
+<!-- =====================================================
+     DIMENSIONES
+===================================================== -->
+
+<div id="dimensions"></div>
+
+
+<!-- =====================================================
+     MENSAJES
+===================================================== -->
+
+<div id="message"></div>
+
+
+<!-- =====================================================
+     MENU
+===================================================== -->
+
+<div id="menu">
+
+
+  <button id="menuButton">
+
+    ☰
+
+  </button>
+
+
+  <div id="menuPanel">
+
+
+    <button id="resetButton">
+
+      🔄 Centrar modelo
+
+    </button>
+
+
+    <button id="wireButton">
+
+      🕸️ Wireframe
+
+    </button>
+
+
+    <button id="colorButton">
+
+      🎨 Cambiar color
+
+    </button>
+
+
+    <button id="shareButton">
+
+      🔗 Compartir
+
+    </button>
+
+
+    <button id="fullscreenButton">
+
+      ⛶ Pantalla completa
+
+    </button>
+
+
+    <button id="homeButton">
+
+      🏠 Volver al inicio
+
+    </button>
+
+
+    <button id="closeMenu">
+
+      ✕ Cerrar menú
+
+    </button>
+
+
+  </div>
+
+
+</div>
+
+
+
 <script type="module">
+
+
+/* =====================================================
+   IMPORTACIONES
+===================================================== */
 
 
 import * as THREE
@@ -87,22 +426,78 @@ from "three/addons/loaders/STLLoader.js";
 
 
 
+/* =====================================================
+   ELEMENTOS HTML
+===================================================== */
+
+
 const info =
 document.getElementById("info");
 
 
+const dimensions =
+document.getElementById("dimensions");
 
-/* ESCENA */
+
+const message =
+document.getElementById("message");
+
+
+const menuButton =
+document.getElementById("menuButton");
+
+
+const menuPanel =
+document.getElementById("menuPanel");
+
+
+const resetButton =
+document.getElementById("resetButton");
+
+
+const wireButton =
+document.getElementById("wireButton");
+
+
+const colorButton =
+document.getElementById("colorButton");
+
+
+const shareButton =
+document.getElementById("shareButton");
+
+
+const fullscreenButton =
+document.getElementById("fullscreenButton");
+
+
+const homeButton =
+document.getElementById("homeButton");
+
+
+const closeMenu =
+document.getElementById("closeMenu");
+
+
+
+/* =====================================================
+   ESCENA
+===================================================== */
+
 
 const scene =
 new THREE.Scene();
+
 
 scene.background =
 new THREE.Color(0x202020);
 
 
 
-/* CAMARA */
+/* =====================================================
+   CAMARA
+===================================================== */
+
 
 const camera =
 new THREE.PerspectiveCamera(
@@ -118,6 +513,7 @@ new THREE.PerspectiveCamera(
 
 );
 
+
 camera.position.set(
  100,
  100,
@@ -126,14 +522,34 @@ camera.position.set(
 
 
 
-/* RENDERER */
+/* =====================================================
+   RENDERER
+===================================================== */
+
 
 const renderer =
 new THREE.WebGLRenderer({
 
-  antialias: true
+  antialias: true,
+
+  powerPreference:
+    "high-performance"
 
 });
+
+
+renderer.setPixelRatio(
+
+  Math.min(
+
+    window.devicePixelRatio || 1,
+
+    2
+
+  )
+
+);
+
 
 renderer.setSize(
 
@@ -143,52 +559,94 @@ renderer.setSize(
 
 );
 
-renderer.setPixelRatio(
 
-  Math.min(
-    window.devicePixelRatio,
-    2
-  )
-
-);
-
-document.body.appendChild(
+document
+.getElementById("viewer")
+.appendChild(
   renderer.domElement
 );
 
 
 
-/* LUCES */
+/* =====================================================
+   LUCES
+===================================================== */
+
+
+const ambientLight =
+new THREE.AmbientLight(
+
+  0xffffff,
+
+  2
+
+);
+
 
 scene.add(
-
-  new THREE.AmbientLight(
-    0xffffff,
-    2
-  )
-
+  ambientLight
 );
 
 
-const light =
+const directionalLight =
 new THREE.DirectionalLight(
+
   0xffffff,
+
   2
+
 );
 
 
-light.position.set(
+directionalLight.position.set(
+
   1,
   1,
   1
+
 );
 
 
-scene.add(light);
+scene.add(
+  directionalLight
+);
 
 
 
-/* CONTROLES */
+/* =====================================================
+   SEGUNDA LUZ
+===================================================== */
+
+
+const directionalLight2 =
+new THREE.DirectionalLight(
+
+  0xffffff,
+
+  1
+
+);
+
+
+directionalLight2.position.set(
+
+  -1,
+  -1,
+  -1
+
+);
+
+
+scene.add(
+  directionalLight2
+);
+
+
+
+/* =====================================================
+   CONTROLES
+===================================================== */
+
 
 const controls =
 new OrbitControls(
@@ -199,28 +657,82 @@ new OrbitControls(
 
 );
 
+
 controls.enableDamping =
 true;
 
 
+controls.dampingFactor =
+0.08;
 
-/* STL */
+
+controls.enableZoom =
+true;
+
+
+controls.enablePan =
+true;
+
+
+controls.rotateSpeed =
+0.7;
+
+
+controls.zoomSpeed =
+1;
+
+
+controls.panSpeed =
+0.8;
+
+
+
+/* =====================================================
+   STL
+===================================================== */
+
 
 const loader =
 new STLLoader();
 
 
+let model = null;
 
-/*
-=====================================================
-OBTENER NOMBRE DEL STL DESDE LA URL
-=====================================================
-*/
+let modelSize = null;
+
+let wireframe = false;
+
+let colorIndex = 0;
+
+
+const colors = [
+
+  0xb0b0b0,
+
+  0x00aaff,
+
+  0xff5555,
+
+  0x55cc55,
+
+  0xffaa00,
+
+  0xffffff
+
+];
+
+
+
+/* =====================================================
+   PARAMETRO URL
+===================================================== */
 
 
 const params =
 new URLSearchParams(
+
   window.location.search
+
 );
 
 
@@ -229,32 +741,33 @@ params.get("modelo");
 
 
 
-if (!archivo) {
+/* =====================================================
+   CARGAR STL
+===================================================== */
 
 
-  info.textContent =
-    "❌ No se indicó ningún STL";
+async function cargarSTL(
+  nombre
+) {
 
 
-}
-
-else {
+  if (!nombre) {
 
 
-  cargarSTL(archivo);
+    info.innerHTML =
 
-}
+      "❌ No se indicó ningún modelo<br>" +
 
+      "<small>" +
 
+      "Usa ?modelo=nombre.stl" +
 
-/*
-=====================================================
-CARGAR STL
-=====================================================
-*/
+      "</small>";
 
 
-async function cargarSTL(nombre) {
+    return;
+
+  }
 
 
   info.textContent =
@@ -264,24 +777,31 @@ async function cargarSTL(nombre) {
 
 
   /*
-    encodeURIComponent solamente
-    para el nombre del archivo.
+    Codificar correctamente cada
+    parte del nombre del archivo.
   */
 
 
   const url =
+
     "./" +
+
     nombre
+
       .split("/")
+
       .map(
+
         parte =>
           encodeURIComponent(parte)
+
       )
+
       .join("/");
 
 
   console.log(
-    "Cargando:",
+    "STL:",
     url
   );
 
@@ -289,40 +809,59 @@ async function cargarSTL(nombre) {
   try {
 
 
-    const respuesta =
+    const response =
       await fetch(url);
 
 
     console.log(
+
       "HTTP:",
-      respuesta.status
+
+      response.status
+
     );
 
 
-    if (!respuesta.ok) {
+    if (!response.ok) {
 
       throw new Error(
 
         "HTTP " +
-        respuesta.status
+        response.status
 
       );
 
     }
 
 
+    info.textContent =
+      "⏳ Procesando modelo...";
+
+
     const buffer =
-      await respuesta.arrayBuffer();
+      await response.arrayBuffer();
 
 
     console.log(
+
       "Bytes:",
+
       buffer.byteLength
+
     );
 
 
-    info.textContent =
-      "⏳ Procesando STL...";
+    if (
+      buffer.byteLength === 0
+    ) {
+
+      throw new Error(
+
+        "El archivo está vacío"
+
+      );
+
+    }
 
 
     const geometry =
@@ -331,142 +870,13 @@ async function cargarSTL(nombre) {
       );
 
 
-    geometry.computeVertexNormals();
+    crearModelo(
 
+      geometry,
 
-    geometry.computeBoundingBox();
-
-
-    const box =
-      geometry.boundingBox;
-
-
-    const center =
-      new THREE.Vector3();
-
-
-    box.getCenter(
-      center
-    );
-
-
-    const size =
-      new THREE.Vector3();
-
-
-    box.getSize(
-      size
-    );
-
-
-    /*
-    MODELO
-    */
-
-
-    const material =
-      new THREE.MeshStandardMaterial({
-
-        color: 0xb0b0b0,
-
-        roughness: 0.7,
-
-        metalness: 0.1
-
-      });
-
-
-    const model =
-      new THREE.Mesh(
-
-        geometry,
-
-        material
-
-      );
-
-
-    model.position.sub(
-      center
-    );
-
-
-    scene.add(model);
-
-
-
-    /*
-    CAMARA
-    */
-
-
-    const maxSize =
-      Math.max(
-
-        size.x,
-        size.y,
-        size.z
-
-      );
-
-
-    const distancia =
-      maxSize * 2.2;
-
-
-    camera.position.set(
-
-      distancia,
-      distancia,
-      distancia
+      nombre
 
     );
-
-
-    camera.near =
-      maxSize / 10000;
-
-
-    camera.far =
-      maxSize * 100;
-
-
-    camera.updateProjectionMatrix();
-
-
-    controls.target.set(
-      0,
-      0,
-      0
-    );
-
-
-    controls.update();
-
-
-
-    /*
-    INFORMACION
-    */
-
-
-    info.innerHTML =
-
-      "📦 " +
-      nombre +
-      "<br>" +
-
-      "X: " +
-      size.x.toFixed(2) +
-      " | " +
-
-      "Y: " +
-      size.y.toFixed(2) +
-      " | " +
-
-      "Z: " +
-      size.z.toFixed(2);
-
 
 
   }
@@ -481,10 +891,12 @@ async function cargarSTL(nombre) {
 
     info.innerHTML =
 
-      "❌ ERROR<br>" +
+      "❌ Error al cargar STL<br>" +
 
       "<small>" +
+
       error.message +
+
       "</small>";
 
   }
@@ -493,44 +905,690 @@ async function cargarSTL(nombre) {
 
 
 
-/*
-=====================================================
-ANIMACION
-=====================================================
-*/
+/* =====================================================
+   CREAR MODELO
+===================================================== */
 
 
-function animate() {
+function crearModelo(
+  geometry,
+  nombre
+) {
 
 
-  requestAnimationFrame(
-    animate
+  /*
+    Eliminar modelo anterior
+  */
+
+
+  if (model) {
+
+
+    scene.remove(
+      model
+    );
+
+
+    model.geometry.dispose();
+
+
+    model.material.dispose();
+
+
+  }
+
+
+  /*
+    Normales
+  */
+
+
+  geometry.computeVertexNormals();
+
+
+  /*
+    Bounding box
+  */
+
+
+  geometry.computeBoundingBox();
+
+
+  const box =
+    geometry.boundingBox;
+
+
+  if (!box) {
+
+
+    throw new Error(
+
+      "El STL no tiene geometría válida"
+
+    );
+
+  }
+
+
+  /*
+    Centro
+  */
+
+
+  const center =
+    new THREE.Vector3();
+
+
+  box.getCenter(
+    center
+  );
+
+
+  /*
+    Tamaño
+  */
+
+
+  const size =
+    new THREE.Vector3();
+
+
+  box.getSize(
+    size
+  );
+
+
+  modelSize =
+    size.clone();
+
+
+  /*
+    Material
+  */
+
+
+  const material =
+    new THREE.MeshStandardMaterial({
+
+      color:
+        colors[colorIndex],
+
+      roughness:
+        0.65,
+
+      metalness:
+        0.1,
+
+      side:
+        THREE.DoubleSide
+
+    });
+
+
+  /*
+    Mesh
+  */
+
+
+  model =
+    new THREE.Mesh(
+
+      geometry,
+
+      material
+
+    );
+
+
+  /*
+    Centrar
+  */
+
+
+  model.position.sub(
+    center
+  );
+
+
+  scene.add(
+    model
+  );
+
+
+  /*
+    Nombre
+  */
+
+
+  info.textContent =
+    "📦 " +
+    nombre;
+
+
+  /*
+    Dimensiones
+  */
+
+
+  dimensions.innerHTML =
+
+    "<b>Dimensiones</b><br>" +
+
+    "X: " +
+    size.x.toFixed(2) +
+    " mm<br>" +
+
+    "Y: " +
+    size.y.toFixed(2) +
+    " mm<br>" +
+
+    "Z: " +
+    size.z.toFixed(2) +
+    " mm";
+
+
+  dimensions.style.display =
+    "block";
+
+
+  /*
+    Ajustar cámara
+  */
+
+
+  ajustarCamara(
+    size
+  );
+
+
+}
+
+
+
+/* =====================================================
+   AJUSTAR CAMARA
+===================================================== */
+
+
+function ajustarCamara(
+  size
+) {
+
+
+  if (!size) {
+    return;
+  }
+
+
+  const maxSize =
+    Math.max(
+
+      size.x,
+      size.y,
+      size.z
+
+    );
+
+
+  if (
+
+    !isFinite(maxSize) ||
+
+    maxSize <= 0
+
+  ) {
+
+    return;
+
+  }
+
+
+  const distancia =
+    maxSize * 2.2;
+
+
+  camera.position.set(
+
+    distancia,
+    distancia,
+    distancia
+
+  );
+
+
+  camera.near =
+
+    Math.max(
+
+      maxSize / 10000,
+
+      0.001
+
+    );
+
+
+  camera.far =
+
+    Math.max(
+
+      maxSize * 100,
+
+      1000
+
+    );
+
+
+  camera.updateProjectionMatrix();
+
+
+  controls.target.set(
+
+    0,
+    0,
+    0
+
   );
 
 
   controls.update();
 
 
-  renderer.render(
+}
 
-    scene,
 
-    camera
 
+/* =====================================================
+   MENU
+===================================================== */
+
+
+menuButton.addEventListener(
+
+  "click",
+
+  () => {
+
+
+    menuPanel.style.display =
+
+      menuPanel.style.display ===
+      "block"
+
+      ? "none"
+
+      : "block";
+
+
+  }
+
+);
+
+
+closeMenu.addEventListener(
+
+  "click",
+
+  () => {
+
+
+    menuPanel.style.display =
+      "none";
+
+
+  }
+
+);
+
+
+
+/* =====================================================
+   CENTRAR
+===================================================== */
+
+
+resetButton.addEventListener(
+
+  "click",
+
+  () => {
+
+
+    ajustarCamara(
+      modelSize
+    );
+
+
+    mostrarMensaje(
+      "🔄 Modelo centrado"
+    );
+
+
+  }
+
+);
+
+
+
+/* =====================================================
+   WIREFRAME
+===================================================== */
+
+
+wireButton.addEventListener(
+
+  "click",
+
+  () => {
+
+
+    if (!model) {
+      return;
+    }
+
+
+    wireframe =
+      !wireframe;
+
+
+    model.material.wireframe =
+      wireframe;
+
+
+    wireButton.textContent =
+
+      wireframe
+
+      ? "🕸️ Vista sólida"
+
+      : "🕸️ Wireframe";
+
+
+  }
+
+);
+
+
+
+/* =====================================================
+   COLOR
+===================================================== */
+
+
+colorButton.addEventListener(
+
+  "click",
+
+  () => {
+
+
+    if (!model) {
+      return;
+    }
+
+
+    colorIndex++;
+
+
+    if (
+
+      colorIndex >=
+      colors.length
+
+    ) {
+
+      colorIndex = 0;
+
+    }
+
+
+    model.material.color.setHex(
+
+      colors[colorIndex]
+
+    );
+
+
+    mostrarMensaje(
+      "🎨 Color cambiado"
+    );
+
+
+  }
+
+);
+
+
+
+/* =====================================================
+   COMPARTIR
+===================================================== */
+
+
+shareButton.addEventListener(
+
+  "click",
+
+  async () => {
+
+
+    const url =
+      window.location.href;
+
+
+    try {
+
+
+      /*
+        Usar menú nativo del teléfono
+      */
+
+
+      if (
+        navigator.share
+      ) {
+
+
+        await navigator.share({
+
+          title:
+            "Visor 3D STL",
+
+          text:
+            "Visualiza este modelo 3D",
+
+          url:
+            url
+
+        });
+
+
+      }
+
+
+      /*
+        Si no existe navigator.share,
+        copiar enlace.
+      */
+
+
+      else {
+
+
+        await navigator.clipboard
+          .writeText(url);
+
+
+        mostrarMensaje(
+
+          "🔗 Enlace copiado"
+
+        );
+
+
+      }
+
+
+    }
+
+    catch(error) {
+
+
+      /*
+        El usuario pudo cancelar
+        el menú de compartir.
+      */
+
+
+      console.log(
+        "Compartir cancelado"
+      );
+
+
+    }
+
+  }
+
+);
+
+
+
+/* =====================================================
+   PANTALLA COMPLETA
+===================================================== */
+
+
+fullscreenButton.addEventListener(
+
+  "click",
+
+  async () => {
+
+
+    try {
+
+
+      if (
+        !document.fullscreenElement
+      ) {
+
+
+        await document
+          .documentElement
+          .requestFullscreen();
+
+
+        fullscreenButton.textContent =
+
+          "⛶ Salir de pantalla completa";
+
+
+      }
+
+
+      else {
+
+
+        await document
+          .exitFullscreen();
+
+
+        fullscreenButton.textContent =
+
+          "⛶ Pantalla completa";
+
+
+      }
+
+
+    }
+
+    catch(error) {
+
+
+      mostrarMensaje(
+
+        "La pantalla completa no está disponible"
+
+      );
+
+    }
+
+  }
+
+);
+
+
+
+/* =====================================================
+   INICIO
+===================================================== */
+
+
+homeButton.addEventListener(
+
+  "click",
+
+  () => {
+
+
+    window.location.href =
+      window.location.pathname;
+
+
+  }
+
+);
+
+
+
+/* =====================================================
+   MENSAJES
+===================================================== */
+
+
+let messageTimer;
+
+
+function mostrarMensaje(
+  texto
+) {
+
+
+  message.textContent =
+    texto;
+
+
+  message.style.display =
+    "block";
+
+
+  clearTimeout(
+    messageTimer
   );
+
+
+  messageTimer =
+
+    setTimeout(
+
+      () => {
+
+        message.style.display =
+          "none";
+
+      },
+
+      1800
+
+    );
 
 }
 
 
-animate();
 
-
-
-/*
-=====================================================
-RESIZE
-=====================================================
-*/
+/* =====================================================
+   RESIZE
+===================================================== */
 
 
 window.addEventListener(
@@ -560,6 +1618,49 @@ window.addEventListener(
 
   }
 
+);
+
+
+
+/* =====================================================
+   ANIMACION
+===================================================== */
+
+
+function animate() {
+
+
+  requestAnimationFrame(
+    animate
+  );
+
+
+  controls.update();
+
+
+  renderer.render(
+
+    scene,
+
+    camera
+
+  );
+
+
+}
+
+
+animate();
+
+
+
+/* =====================================================
+   INICIAR
+===================================================== */
+
+
+cargarSTL(
+  archivo
 );
 
 
