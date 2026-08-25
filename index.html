@@ -7,10 +7,10 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-      content="width=device-width,
-               initial-scale=1.0,
-               maximum-scale=1.0,
-               user-scalable=no">
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no">
 
 <title>Visor 3D STL</title>
 
@@ -35,22 +35,22 @@ body {
 
   font-family: Arial, sans-serif;
 
-  touch-action: none;
 }
 
+body {
+  touch-action: none;
+}
 
 #viewer {
 
   position: fixed;
 
-  top: 0;
-  left: 0;
+  inset: 0;
 
   width: 100%;
   height: 100%;
 
 }
-
 
 #info {
 
@@ -62,20 +62,17 @@ body {
 
   z-index: 10;
 
-  padding: 12px 15px;
-
-  text-align: center;
+  padding: 12px;
 
   color: white;
 
-  background: rgba(0,0,0,0.78);
+  background: rgba(0,0,0,0.8);
+
+  text-align: center;
 
   font-size: 14px;
 
-  min-height: 45px;
-
 }
-
 
 #menu {
 
@@ -88,47 +85,40 @@ body {
 
 }
 
-
 #menuButton {
 
-  width: 45px;
-  height: 45px;
+  width: 48px;
+  height: 48px;
 
   border: none;
 
   border-radius: 12px;
 
-  background: rgba(0,0,0,0.75);
+  background: rgba(0,0,0,0.8);
 
   color: white;
 
   font-size: 22px;
 
-  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
-
 }
-
 
 #menuPanel {
 
   display: none;
 
+  width: 210px;
+
   margin-top: 8px;
 
   padding: 10px;
 
-  width: 210px;
-
   border-radius: 12px;
 
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.9);
 
 }
 
-
 #menuPanel button {
-
-  display: block;
 
   width: 100%;
 
@@ -148,69 +138,34 @@ body {
 
 }
 
-
 #menuPanel button:last-child {
-
   margin-bottom: 0;
-
 }
-
 
 #dimensions {
 
   position: fixed;
 
   left: 10px;
-
   bottom: 15px;
 
   z-index: 10;
 
   display: none;
 
-  padding: 10px 12px;
+  padding: 10px;
 
   border-radius: 10px;
 
-  color: white;
-
   background: rgba(0,0,0,0.75);
+
+  color: white;
 
   font-size: 13px;
 
   line-height: 1.5;
 
 }
-
-
-#shareMessage {
-
-  position: fixed;
-
-  left: 50%;
-
-  bottom: 20px;
-
-  transform: translateX(-50%);
-
-  z-index: 30;
-
-  display: none;
-
-  padding: 12px 18px;
-
-  border-radius: 12px;
-
-  color: white;
-
-  background: #111;
-
-  font-size: 14px;
-
-  white-space: nowrap;
-
-}
-
 
 </style>
 
@@ -224,66 +179,51 @@ body {
 
 
 <div id="info">
-  Cargando visor...
+  Iniciando visor...
 </div>
 
 
 <div id="dimensions"></div>
 
 
-<div id="shareMessage">
-  Enlace copiado
-</div>
-
-
 <div id="menu">
-
 
   <button id="menuButton">
     ☰
   </button>
 
-
   <div id="menuPanel">
 
-
     <button id="resetButton">
-      🔄 Centrar modelo
+      🔄 Centrar
     </button>
-
 
     <button id="wireButton">
       🕸️ Wireframe
     </button>
 
-
     <button id="colorButton">
-      🎨 Cambiar color
+      🎨 Color
     </button>
-
 
     <button id="shareButton">
-      🔗 Compartir modelo
+      🔗 Compartir
     </button>
-
 
     <button id="homeButton">
-      🏠 Ver modelos
+      🏠 Inicio
     </button>
-
 
   </div>
 
-
 </div>
-
 
 
 <script type="module">
 
 
 /* =====================================================
-   THREE.JS
+   IMPORTACIONES
 ===================================================== */
 
 
@@ -308,41 +248,29 @@ import { STLLoader } from
 const info =
 document.getElementById("info");
 
-
 const dimensions =
 document.getElementById("dimensions");
-
 
 const menuButton =
 document.getElementById("menuButton");
 
-
 const menuPanel =
 document.getElementById("menuPanel");
-
 
 const resetButton =
 document.getElementById("resetButton");
 
-
 const wireButton =
 document.getElementById("wireButton");
-
 
 const colorButton =
 document.getElementById("colorButton");
 
-
 const shareButton =
 document.getElementById("shareButton");
 
-
 const homeButton =
 document.getElementById("homeButton");
-
-
-const shareMessage =
-document.getElementById("shareMessage");
 
 
 
@@ -353,7 +281,6 @@ document.getElementById("shareMessage");
 
 const scene =
 new THREE.Scene();
-
 
 scene.background =
 new THREE.Color(0x202020);
@@ -379,7 +306,6 @@ new THREE.PerspectiveCamera(
 
 );
 
-
 camera.position.set(
  100,
  100,
@@ -389,7 +315,7 @@ camera.position.set(
 
 
 /* =====================================================
-   RENDERER
+   RENDER
 ===================================================== */
 
 
@@ -398,7 +324,8 @@ new THREE.WebGLRenderer({
 
   antialias: true,
 
-  powerPreference: "high-performance"
+  powerPreference:
+    "high-performance"
 
 });
 
@@ -424,7 +351,9 @@ renderer.setSize(
 
 document
 .getElementById("viewer")
-.appendChild(renderer.domElement);
+.appendChild(
+  renderer.domElement
+);
 
 
 
@@ -433,57 +362,31 @@ document
 ===================================================== */
 
 
-const ambientLight =
-new THREE.AmbientLight(
+scene.add(
 
-  0xffffff,
-
-  1.8
+  new THREE.AmbientLight(
+    0xffffff,
+    2
+  )
 
 );
 
 
-scene.add(ambientLight);
-
-
-const light1 =
+const light =
 new THREE.DirectionalLight(
-
   0xffffff,
-
   2
-
 );
 
 
-light1.position.set(
- 1,
- 1,
- 1
-);
-
-
-scene.add(light1);
-
-
-const light2 =
-new THREE.DirectionalLight(
-
-  0xffffff,
-
+light.position.set(
+  1,
+  1,
   1
-
 );
 
 
-light2.position.set(
- -1,
- -1,
- -1
-);
-
-
-scene.add(light2);
+scene.add(light);
 
 
 
@@ -505,30 +408,25 @@ new OrbitControls(
 controls.enableDamping =
 true;
 
-
 controls.dampingFactor =
 0.08;
-
 
 controls.enableZoom =
 true;
 
-
 controls.enablePan =
 true;
-
 
 controls.rotateSpeed =
 0.7;
 
-
 controls.zoomSpeed =
-1.0;
+1;
 
 
 
 /* =====================================================
-   VARIABLES DEL MODELO
+   VARIABLES
 ===================================================== */
 
 
@@ -538,10 +436,6 @@ new STLLoader();
 
 let model = null;
 
-let modelGeometry = null;
-
-let modelMaterial = null;
-
 let modelSize = null;
 
 let wireframe = false;
@@ -549,19 +443,13 @@ let wireframe = false;
 let colorIndex = 0;
 
 
-
 const colors = [
 
   0xb0b0b0,
-
   0x00aaff,
-
   0xff5555,
-
   0x55cc55,
-
   0xffaa00,
-
   0xffffff
 
 ];
@@ -569,7 +457,7 @@ const colors = [
 
 
 /* =====================================================
-   OBTENER MODELO DESDE LA URL
+   LEER PARAMETRO URL
 ===================================================== */
 
 
@@ -585,22 +473,18 @@ params.get("modelo");
 
 
 /* =====================================================
-   CARGAR MODELO
+   CARGAR STL CON FETCH
 ===================================================== */
 
 
-function cargarModelo() {
+async function cargarSTL() {
 
 
   if (!modelo) {
 
-
-    info.textContent =
-      "Visor 3D — falta indicar un modelo";
-
-
-    mostrarAyuda();
-
+    info.innerHTML =
+      "Visor 3D<br>" +
+      "<small>Falta indicar un modelo</small>";
 
     return;
 
@@ -608,103 +492,127 @@ function cargarModelo() {
 
 
   /*
-    IMPORTANTE:
-
-    El nombre que aparece después de
-    ?modelo= debe coincidir con el
-    nombre del STL que tengas en GitHub.
+    decodeURIComponent permite recibir
+    nombres con espacios y caracteres
+    especiales.
   */
 
 
-  const archivo =
+  const nombreArchivo =
     decodeURIComponent(modelo);
 
 
+  /*
+    encodeURI conserva las barras /
+    pero codifica espacios y caracteres
+    especiales.
+  */
+
+
   const url =
-    "./" + archivo;
+    "./" + encodeURI(nombreArchivo);
+
+
+  console.log(
+    "Intentando cargar:",
+    url
+  );
 
 
   info.textContent =
-    "⏳ Cargando " + archivo + "...";
+    "⏳ Descargando STL...";
 
 
-  loader.load(
-
-    url,
+  try {
 
 
-    function(geometry) {
+    const response =
+      await fetch(url);
 
 
-      console.log(
-        "STL cargado:",
-        url
+    console.log(
+      "HTTP:",
+      response.status,
+      response.statusText
+    );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+
+        "HTTP " +
+        response.status +
+        " — " +
+        response.statusText
+
       );
-
-
-      crearModelo(
-
-        geometry,
-
-        archivo
-
-      );
-
-
-    },
-
-
-    function(xhr) {
-
-
-      if (xhr.total) {
-
-
-        const porcentaje =
-          Math.round(
-
-            xhr.loaded /
-            xhr.total *
-            100
-
-          );
-
-
-        info.textContent =
-
-          "⏳ Cargando " +
-          archivo +
-          " — " +
-          porcentaje +
-          "%";
-
-
-      }
-
-    },
-
-
-    function(error) {
-
-
-      console.error(
-        "Error cargando STL:",
-        error
-      );
-
-
-      info.innerHTML =
-
-        "❌ No se pudo cargar el modelo<br>" +
-
-        "<small>" +
-        archivo +
-        "</small>";
-
 
     }
 
-  );
+
+    info.textContent =
+      "⏳ Procesando modelo...";
+
+
+    const arrayBuffer =
+      await response.arrayBuffer();
+
+
+    console.log(
+      "Bytes recibidos:",
+      arrayBuffer.byteLength
+    );
+
+
+    if (
+      arrayBuffer.byteLength === 0
+    ) {
+
+      throw new Error(
+        "El archivo está vacío"
+      );
+
+    }
+
+
+    const geometry =
+      loader.parse(
+        arrayBuffer
+      );
+
+
+    console.log(
+      "Geometría creada correctamente"
+    );
+
+
+    crearModelo(
+      geometry,
+      nombreArchivo
+    );
+
+
+  }
+
+  catch(error) {
+
+
+    console.error(
+      "ERROR:",
+      error
+    );
+
+
+    info.innerHTML =
+
+      "❌ Error al cargar STL<br>" +
+
+      "<small>" +
+      error.message +
+      "</small>";
+
+  }
 
 }
 
@@ -721,39 +629,33 @@ function crearModelo(
 ) {
 
 
-  /* Eliminar modelo anterior */
-
   if (model) {
 
     scene.remove(model);
 
-    if (model.geometry) {
+    model.geometry.dispose();
 
-      model.geometry.dispose();
-
-    }
-
-    if (model.material) {
-
-      model.material.dispose();
-
-    }
+    model.material.dispose();
 
   }
 
 
-  modelGeometry =
-    geometry;
-
-
   geometry.computeVertexNormals();
-
 
   geometry.computeBoundingBox();
 
 
   const box =
     geometry.boundingBox;
+
+
+  if (!box) {
+
+    throw new Error(
+      "El STL no tiene geometría válida"
+    );
+
+  }
 
 
   const center =
@@ -774,38 +676,32 @@ function crearModelo(
     size.clone();
 
 
-  /* Material */
-
-  modelMaterial =
+  const material =
     new THREE.MeshStandardMaterial({
 
-      color: colors[colorIndex],
+      color:
+        colors[colorIndex],
 
-      roughness: 0.65,
+      roughness:
+        0.65,
 
-      metalness: 0.1,
+      metalness:
+        0.1,
 
-      side: THREE.DoubleSide
+      side:
+        THREE.DoubleSide
 
     });
 
-
-  /* Modelo */
 
   model =
     new THREE.Mesh(
 
       geometry,
 
-      modelMaterial
+      material
 
     );
-
-
-  /*
-    Centramos el modelo para que
-    el OrbitControls funcione bien.
-  */
 
 
   model.position.sub(center);
@@ -813,8 +709,6 @@ function crearModelo(
 
   scene.add(model);
 
-
-  /* Información */
 
   info.textContent =
     "📦 " + nombre;
@@ -841,9 +735,9 @@ function crearModelo(
     "block";
 
 
-  /* Centrar cámara */
-
-  ajustarCamara(size);
+  ajustarCamara(
+    size
+  );
 
 
 }
@@ -851,7 +745,7 @@ function crearModelo(
 
 
 /* =====================================================
-   AJUSTAR CAMARA
+   CAMARA
 ===================================================== */
 
 
@@ -859,9 +753,7 @@ function ajustarCamara(size) {
 
 
   if (!size) {
-
     return;
-
   }
 
 
@@ -869,12 +761,20 @@ function ajustarCamara(size) {
     Math.max(
 
       size.x,
-
       size.y,
-
       size.z
 
     );
+
+
+  if (
+    !isFinite(maxSize) ||
+    maxSize <= 0
+  ) {
+
+    return;
+
+  }
 
 
   const distancia =
@@ -884,9 +784,7 @@ function ajustarCamara(size) {
   camera.position.set(
 
     distancia,
-
     distancia,
-
     distancia
 
   );
@@ -931,25 +829,15 @@ menuButton.addEventListener(
 
   "click",
 
-  function() {
+  () => {
 
+    menuPanel.style.display =
 
-    if (
       menuPanel.style.display ===
       "block"
-    ) {
 
-      menuPanel.style.display =
-        "none";
-
-    }
-
-    else {
-
-      menuPanel.style.display =
-        "block";
-
-    }
+        ? "none"
+        : "block";
 
   }
 
@@ -966,11 +854,11 @@ resetButton.addEventListener(
 
   "click",
 
-  function() {
+  () => {
 
-
-    ajustarCamara(modelSize);
-
+    ajustarCamara(
+      modelSize
+    );
 
   }
 
@@ -987,13 +875,11 @@ wireButton.addEventListener(
 
   "click",
 
-  function() {
+  () => {
 
 
     if (!model) {
-
       return;
-
     }
 
 
@@ -1013,7 +899,6 @@ wireButton.addEventListener(
 
         : "🕸️ Wireframe";
 
-
   }
 
 );
@@ -1021,7 +906,7 @@ wireButton.addEventListener(
 
 
 /* =====================================================
-   CAMBIAR COLOR
+   COLOR
 ===================================================== */
 
 
@@ -1029,13 +914,11 @@ colorButton.addEventListener(
 
   "click",
 
-  function() {
+  () => {
 
 
     if (!model) {
-
       return;
-
     }
 
 
@@ -1072,7 +955,7 @@ shareButton.addEventListener(
 
   "click",
 
-  async function() {
+  async () => {
 
 
     const url =
@@ -1106,27 +989,24 @@ shareButton.addEventListener(
       else {
 
 
-        await navigator.clipboard.writeText(
-          url
+        await navigator.clipboard
+          .writeText(url);
+
+
+        alert(
+          "Enlace copiado"
         );
-
-
-        mostrarMensaje(
-          "🔗 Enlace copiado"
-        );
-
 
       }
+
 
     }
 
     catch(error) {
 
-
       console.log(
         "Compartir cancelado"
       );
-
 
     }
 
@@ -1137,7 +1017,7 @@ shareButton.addEventListener(
 
 
 /* =====================================================
-   VOLVER AL INICIO
+   INICIO
 ===================================================== */
 
 
@@ -1145,73 +1025,14 @@ homeButton.addEventListener(
 
   "click",
 
-  function() {
-
+  () => {
 
     window.location.href =
       window.location.pathname;
 
-
   }
 
 );
-
-
-
-/* =====================================================
-   MENSAJE
-===================================================== */
-
-
-function mostrarMensaje(texto) {
-
-
-  shareMessage.textContent =
-    texto;
-
-
-  shareMessage.style.display =
-    "block";
-
-
-  setTimeout(
-
-    function() {
-
-      shareMessage.style.display =
-        "none";
-
-    },
-
-    2000
-
-  );
-
-}
-
-
-
-/* =====================================================
-   AYUDA SI NO HAY MODELO
-===================================================== */
-
-
-function mostrarAyuda() {
-
-
-  dimensions.style.display =
-    "block";
-
-
-  dimensions.innerHTML =
-
-    "<b>Cómo abrir un modelo</b><br><br>" +
-
-    "Agrega el nombre del STL en la URL:<br><br>" +
-
-    "?modelo=ventaja.stl";
-
-}
 
 
 
@@ -1224,7 +1045,7 @@ window.addEventListener(
 
   "resize",
 
-  function() {
+  () => {
 
 
     camera.aspect =
@@ -1267,13 +1088,9 @@ function animate() {
 
 
   renderer.render(
-
     scene,
-
     camera
-
   );
-
 
 }
 
@@ -1287,7 +1104,7 @@ animate();
 ===================================================== */
 
 
-cargarModelo();
+cargarSTL();
 
 
 </script>
