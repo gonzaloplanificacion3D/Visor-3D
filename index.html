@@ -31,222 +31,343 @@
       text-align: center;
       color: white;
       background: rgba(0,0,0,0.75);
+      font-size: 16px;
     }
   </style>
+
+  <!-- Importmap de Three.js -->
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+    }
+  }
+  </script>
+
 </head>
 
 <body>
 
 <div id="info">Cargando modelo 3D...</div>
+
 <div id="viewer"></div>
+
 
 <script type="module">
 
-import * as THREE from
-'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
+import * as THREE from 'three';
 
-import { OrbitControls } from
-'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js';
+import {
+  OrbitControls
+} from 'three/addons/controls/OrbitControls.js';
 
-import { STLLoader } from
-'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/STLLoader.js';
+import {
+  STLLoader
+} from 'three/addons/loaders/STLLoader.js';
 
+
+/* =========================
+   ESCENA
+========================= */
 
 const scene = new THREE.Scene();
 
-scene.background = new THREE.Color(0x202020);
+scene.background =
+  new THREE.Color(0x202020);
 
 
-const camera = new THREE.PerspectiveCamera(
+/* =========================
+   CAMARA
+========================= */
+
+const camera =
+  new THREE.PerspectiveCamera(
     45,
-    window.innerWidth / window.innerHeight,
+    window.innerWidth /
+    window.innerHeight,
     0.1,
     100000
+  );
+
+
+/* =========================
+   RENDER
+========================= */
+
+const renderer =
+  new THREE.WebGLRenderer({
+    antialias: true
+  });
+
+renderer.setPixelRatio(
+  window.devicePixelRatio
 );
 
-
-const renderer = new THREE.WebGLRenderer({
-    antialias: true
-});
-
-renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(
-    window.innerWidth,
-    window.innerHeight
+  window.innerWidth,
+  window.innerHeight
 );
 
 document
-    .getElementById("viewer")
-    .appendChild(renderer.domElement);
+  .getElementById("viewer")
+  .appendChild(renderer.domElement);
 
 
-// Luces
+/* =========================
+   LUCES
+========================= */
 
-const ambientLight = new THREE.AmbientLight(
+const ambient =
+  new THREE.AmbientLight(
     0xffffff,
     1.5
-);
+  );
 
-scene.add(ambientLight);
+scene.add(ambient);
 
 
-const directionalLight = new THREE.DirectionalLight(
+const directional =
+  new THREE.DirectionalLight(
     0xffffff,
     2
+  );
+
+directional.position.set(
+  1,
+  1,
+  1
 );
 
-directionalLight.position.set(1, 1, 1);
-
-scene.add(directionalLight);
+scene.add(directional);
 
 
-// Controles
+/* =========================
+   CONTROLES
+========================= */
 
-const controls = new OrbitControls(
+const controls =
+  new OrbitControls(
     camera,
     renderer.domElement
-);
+  );
 
 controls.enableDamping = true;
 
+controls.dampingFactor = 0.05;
 
-// STL
+controls.screenSpacePanning = true;
 
-const loader = new STLLoader();
+
+/* =========================
+   STL
+========================= */
+
+const loader =
+  new STLLoader();
+
 
 const modelUrl =
-"./ventaja.stl";
+  "./ventaja.stl";
+
+
+document.getElementById("info")
+  .textContent =
+  "Cargando modelo 3D...";
 
 
 loader.load(
 
-    modelUrl,
-
-    function(geometry) {
-
-        geometry.computeBoundingBox();
-
-        const box = geometry.boundingBox;
-
-        const center = new THREE.Vector3();
-
-        box.getCenter(center);
+  modelUrl,
 
 
-        const size = new THREE.Vector3();
+  /* ÉXITO */
 
-        box.getSize(size);
+  function(geometry) {
 
-
-        const model = new THREE.Mesh(
-
-            geometry,
-
-            new THREE.MeshStandardMaterial({
-                color: 0xb0b0b0,
-                roughness: 0.7,
-                metalness: 0.1
-            })
-
-        );
+    console.log(
+      "STL cargado correctamente"
+    );
 
 
-        scene.add(model);
+    geometry.computeBoundingBox();
 
 
-        model.position.sub(center);
+    const box =
+      geometry.boundingBox;
 
 
-        const maxSize = Math.max(
-            size.x,
-            size.y,
-            size.z
-        );
+    const center =
+      new THREE.Vector3();
 
 
-        camera.position.set(
-            maxSize * 1.5,
-            maxSize * 1.5,
-            maxSize * 1.5
-        );
+    box.getCenter(center);
 
 
-        camera.lookAt(0,0,0);
-
-        controls.target.set(0,0,0);
-
-        controls.update();
+    const size =
+      new THREE.Vector3();
 
 
-        document.getElementById("info").innerText =
-        "Visor 3D — mueve con el dedo o mouse";
+    box.getSize(size);
 
 
-    },
+    const model =
+      new THREE.Mesh(
 
-    function(xhr) {
+        geometry,
 
-        if (xhr.total) {
+        new THREE.MeshStandardMaterial({
+          color: 0xb0b0b0,
+          roughness: 0.7,
+          metalness: 0.1
+        })
 
-            const percent =
-            Math.round(
-                xhr.loaded / xhr.total * 100
-            );
-
-            document.getElementById("info").innerText =
-            "Cargando modelo 3D... " + percent + "%";
-
-        }
-
-    },
-
-    function(error) {
-
-        console.error(error);
-
-        document.getElementById("info").innerText =
-        "ERROR: no se pudo cargar el archivo STL.";
-
-    }
-
-);
+      );
 
 
-// Ajustar ventana
-
-window.addEventListener(
-    "resize",
-    function() {
-
-        camera.aspect =
-        window.innerWidth /
-        window.innerHeight;
-
-        camera.updateProjectionMatrix();
-
-        renderer.setSize(
-            window.innerWidth,
-            window.innerHeight
-        );
-
-    }
-);
+    scene.add(model);
 
 
-// Animación
+    /* Centrar */
 
-function animate() {
+    model.position.sub(center);
 
-    requestAnimationFrame(animate);
+
+    /* Tamaño */
+
+    const maxSize =
+      Math.max(
+        size.x,
+        size.y,
+        size.z
+      );
+
+
+    /* Cámara */
+
+    camera.position.set(
+      maxSize * 1.5,
+      maxSize * 1.5,
+      maxSize * 1.5
+    );
+
+
+    camera.lookAt(
+      0,
+      0,
+      0
+    );
+
+
+    controls.target.set(
+      0,
+      0,
+      0
+    );
+
 
     controls.update();
 
-    renderer.render(
-        scene,
-        camera
+
+    document.getElementById("info")
+      .textContent =
+      "Visor 3D — rota y haz zoom";
+
+
+  },
+
+
+  /* PROGRESO */
+
+  function(xhr) {
+
+    if (xhr.total) {
+
+      const percent =
+        Math.round(
+          xhr.loaded /
+          xhr.total *
+          100
+        );
+
+
+      document.getElementById("info")
+        .textContent =
+        "Cargando modelo 3D... " +
+        percent +
+        "%";
+
+    }
+
+  },
+
+
+  /* ERROR */
+
+  function(error) {
+
+    console.error(
+      "ERROR STL:",
+      error
     );
 
+
+    document.getElementById("info")
+      .textContent =
+      "ERROR: no se pudo cargar el STL";
+
+  }
+
+);
+
+
+/* =========================
+   RESIZE
+========================= */
+
+window.addEventListener(
+  "resize",
+  function() {
+
+    camera.aspect =
+      window.innerWidth /
+      window.innerHeight;
+
+
+    camera.updateProjectionMatrix();
+
+
+    renderer.setSize(
+      window.innerWidth,
+      window.innerHeight
+    );
+
+  }
+);
+
+
+/* =========================
+   ANIMACION
+========================= */
+
+function animate() {
+
+  requestAnimationFrame(
+    animate
+  );
+
+
+  controls.update();
+
+
+  renderer.render(
+    scene,
+    camera
+  );
+
 }
+
 
 animate();
 
