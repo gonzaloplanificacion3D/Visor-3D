@@ -1,17 +1,22 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
 
 <meta charset="UTF-8">
 
 <meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
 
-<title>Visor 3D</title>
+<title>Visor STL 3D</title>
 
 <style>
 
-html, body {
+html,
+body {
 
   margin: 0;
 
@@ -25,7 +30,10 @@ html, body {
 
   font-family: Arial, sans-serif;
 
+  touch-action: none;
+
 }
+
 
 #viewer {
 
@@ -34,6 +42,7 @@ html, body {
   height: 100%;
 
 }
+
 
 #info {
 
@@ -47,7 +56,7 @@ html, body {
 
   z-index: 10;
 
-  padding: 14px;
+  padding: 12px;
 
   text-align: center;
 
@@ -55,7 +64,95 @@ html, body {
 
   background: rgba(0,0,0,0.75);
 
+  font-size: 14px;
+
 }
+
+
+#controls {
+
+  position: fixed;
+
+  bottom: 20px;
+
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  z-index: 20;
+
+  display: flex;
+
+  gap: 8px;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  width: 95%;
+
+}
+
+
+button {
+
+  border: none;
+
+  border-radius: 12px;
+
+  padding: 12px 16px;
+
+  background: #ffffff;
+
+  color: #222;
+
+  font-size: 14px;
+
+  font-weight: bold;
+
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+
+}
+
+
+button:active {
+
+  transform: scale(0.95);
+
+}
+
+
+input[type="file"] {
+
+  display: none;
+
+}
+
+
+#dimensions {
+
+  position: fixed;
+
+  left: 10px;
+
+  bottom: 20px;
+
+  z-index: 10;
+
+  color: white;
+
+  background: rgba(0,0,0,0.7);
+
+  padding: 10px;
+
+  border-radius: 10px;
+
+  font-size: 13px;
+
+  display: none;
+
+}
+
 
 </style>
 
@@ -64,32 +161,99 @@ html, body {
 
 <body>
 
+
 <div id="info">
-Cargando modelo 3D...
+
+  Selecciona un archivo STL para comenzar
+
 </div>
+
 
 <div id="viewer"></div>
 
 
+<div id="dimensions"></div>
+
+
+<div id="controls">
+
+
+  <label for="fileInput">
+
+    <button type="button"
+            onclick="document.getElementById('fileInput').click()">
+
+      📂 Abrir STL
+
+    </button>
+
+  </label>
+
+
+  <input
+    id="fileInput"
+    type="file"
+    accept=".stl,model/stl">
+
+
+  <button id="resetButton">
+
+    🔄 Centrar
+
+  </button>
+
+
+  <button id="wireButton">
+
+    🕸️ Wireframe
+
+  </button>
+
+
+  <button id="colorButton">
+
+    🎨 Color
+
+  </button>
+
+
+</div>
+
+
 <script type="module">
 
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js';
-
-import { STLLoader } from 'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/STLLoader.js';
+import * as THREE from
+'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 
 
-/* ESCENA */
+import { OrbitControls } from
+'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js';
+
+
+import { STLLoader } from
+'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/STLLoader.js';
+
+
+
+/* =====================================================
+   ESCENA
+===================================================== */
+
 
 const scene =
 new THREE.Scene();
+
 
 scene.background =
 new THREE.Color(0x202020);
 
 
-/* CAMARA */
+
+/* =====================================================
+   CAMARA
+===================================================== */
+
 
 const camera =
 new THREE.PerspectiveCamera(
@@ -99,30 +263,52 @@ new THREE.PerspectiveCamera(
   window.innerWidth /
   window.innerHeight,
 
-  0.1,
+  0.01,
 
-  100000
+  1000000
 
 );
 
 
-/* RENDER */
+camera.position.set(
+ 100,
+ 100,
+ 100
+);
+
+
+
+/* =====================================================
+   RENDERER
+===================================================== */
+
 
 const renderer =
 new THREE.WebGLRenderer({
 
-  antialias: true
+  antialias: true,
+
+  powerPreference: "high-performance"
 
 });
 
 
 renderer.setPixelRatio(
-window.devicePixelRatio
+
+  Math.min(
+    window.devicePixelRatio,
+    2
+  )
+
 );
 
+
 renderer.setSize(
-window.innerWidth,
-window.innerHeight
+
+  window.innerWidth,
+
+  window.innerHeight
+
 );
 
 
@@ -131,36 +317,52 @@ document
 .appendChild(renderer.domElement);
 
 
-/* LUCES */
 
-scene.add(
-
-  new THREE.AmbientLight(
-    0xffffff,
-    1.5
-  )
-
-);
+/* =====================================================
+   LUCES
+===================================================== */
 
 
-const light =
-new THREE.DirectionalLight(
+const ambientLight =
+new THREE.AmbientLight(
+
   0xffffff,
+
   2
+
 );
 
 
-light.position.set(
+scene.add(ambientLight);
+
+
+const directionalLight =
+new THREE.DirectionalLight(
+
+  0xffffff,
+
+  2
+
+);
+
+
+directionalLight.position.set(
+
   1,
   1,
   1
+
 );
 
 
-scene.add(light);
+scene.add(directionalLight);
 
 
-/* CONTROLES */
+
+/* =====================================================
+   CONTROLES
+===================================================== */
+
 
 const controls =
 new OrbitControls(
@@ -172,174 +374,163 @@ new OrbitControls(
 );
 
 
-controls.enableDamping =
-true;
+controls.enableDamping = true;
+
+controls.dampingFactor = 0.08;
+
+controls.enablePan = true;
+
+controls.enableZoom = true;
+
+controls.rotateSpeed = 0.7;
+
+controls.zoomSpeed = 1.0;
 
 
-/* STL */
+
+/* =====================================================
+   STL LOADER
+===================================================== */
+
 
 const loader =
 new STLLoader();
 
 
-const modelUrl =
-"./ventaja.stl";
+let model = null;
 
+let originalMaterial = null;
 
-loader.load(
+let modelSize = null;
 
-  modelUrl,
 
 
-  function(geometry) {
+/* =====================================================
+   ELEMENTOS HTML
+===================================================== */
 
 
-    console.log(
-      "STL cargado correctamente"
-    );
+const info =
+document.getElementById("info");
 
 
-    geometry.computeBoundingBox();
+const dimensions =
+document.getElementById("dimensions");
 
 
-    const box =
-    geometry.boundingBox;
+const fileInput =
+document.getElementById("fileInput");
 
 
-    const center =
-    new THREE.Vector3();
+const resetButton =
+document.getElementById("resetButton");
 
 
-    box.getCenter(center);
+const wireButton =
+document.getElementById("wireButton");
 
 
-    const size =
-    new THREE.Vector3();
+const colorButton =
+document.getElementById("colorButton");
 
 
-    box.getSize(size);
 
+/* =====================================================
+   CARGAR STL
+===================================================== */
 
-    const material =
-    new THREE.MeshStandardMaterial({
 
-      color: 0xb0b0b0,
+fileInput.addEventListener(
 
-      roughness: 0.7,
+  "change",
 
-      metalness: 0.1
+  function(event) {
 
-    });
 
+    const file =
+    event.target.files[0];
 
-    const model =
-    new THREE.Mesh(
 
-      geometry,
+    if (!file) {
 
-      material
-
-    );
-
-
-    scene.add(model);
-
-
-    model.position.sub(center);
-
-
-    const maxSize =
-    Math.max(
-
-      size.x,
-
-      size.y,
-
-      size.z
-
-    );
-
-
-    camera.position.set(
-
-      maxSize * 1.5,
-
-      maxSize * 1.5,
-
-      maxSize * 1.5
-
-    );
-
-
-    camera.lookAt(
-      0,
-      0,
-      0
-    );
-
-
-    controls.target.set(
-      0,
-      0,
-      0
-    );
-
-
-    controls.update();
-
-
-    document
-    .getElementById("info")
-    .textContent =
-    "Visor 3D — rota y haz zoom";
-
-
-  },
-
-
-  function(xhr) {
-
-
-    if (xhr.total) {
-
-
-      const percent =
-      Math.round(
-
-        xhr.loaded /
-        xhr.total *
-        100
-
-      );
-
-
-      document
-      .getElementById("info")
-      .textContent =
-
-      "Cargando modelo 3D... "
-      + percent + "%";
-
+      return;
 
     }
 
 
-  },
+    if (
+      !file.name
+      .toLowerCase()
+      .endsWith(".stl")
+    ) {
+
+      info.textContent =
+      "❌ El archivo no es un STL";
+
+      return;
+
+    }
 
 
-  function(error) {
+    info.textContent =
+    "⏳ Cargando " +
+    file.name +
+    "...";
 
 
-    console.error(
-      error
-    );
+    const reader =
+    new FileReader();
 
 
-    document
-    .getElementById("info")
-    .textContent =
+    reader.onload = function(e) {
 
-    "ERROR: no se pudo cargar el STL";
+
+      try {
+
+
+        const geometry =
+        loader.parse(
+          e.target.result
+        );
+
+
+        cargarModelo(
+
+          geometry,
+
+          file
+
+        );
+
+
+      }
+
+      catch(error) {
+
+
+        console.error(error);
+
+
+        info.textContent =
+        "❌ Error al leer el STL";
+
+
+      }
+
+    };
+
+
+    reader.onerror = function() {
+
+
+      info.textContent =
+      "❌ No se pudo leer el archivo";
+
+
+    };
+
+
+    reader.readAsArrayBuffer(file);
 
 
   }
@@ -347,7 +538,357 @@ loader.load(
 );
 
 
-/* RESIZE */
+
+/* =====================================================
+   CREAR MODELO
+===================================================== */
+
+
+function cargarModelo(
+  geometry,
+  file
+) {
+
+
+  /* Eliminar modelo anterior */
+
+  if (model) {
+
+    scene.remove(model);
+
+    model.geometry.dispose();
+
+    model.material.dispose();
+
+    model = null;
+
+  }
+
+
+  /* Calcular normales */
+
+  geometry.computeVertexNormals();
+
+
+  /* Bounding box */
+
+  geometry.computeBoundingBox();
+
+
+  const box =
+  geometry.boundingBox;
+
+
+  const center =
+  new THREE.Vector3();
+
+
+  box.getCenter(center);
+
+
+  const size =
+  new THREE.Vector3();
+
+
+  box.getSize(size);
+
+
+  modelSize =
+  size.clone();
+
+
+  /* Material */
+
+  originalMaterial =
+  new THREE.MeshStandardMaterial({
+
+    color: 0xb0b0b0,
+
+    roughness: 0.65,
+
+    metalness: 0.1
+
+  });
+
+
+  /* Mesh */
+
+  model =
+  new THREE.Mesh(
+
+    geometry,
+
+    originalMaterial
+
+  );
+
+
+  /* Centrar modelo */
+
+  model.position.sub(center);
+
+
+  scene.add(model);
+
+
+  /* =================================================
+     INFORMACION
+  ================================================= */
+
+
+  const sizeX =
+  size.x.toFixed(2);
+
+
+  const sizeY =
+  size.y.toFixed(2);
+
+
+  const sizeZ =
+  size.z.toFixed(2);
+
+
+  const sizeKB =
+  (file.size / 1024).toFixed(1);
+
+
+  info.textContent =
+  "📦 " + file.name;
+
+
+  dimensions.innerHTML =
+
+  "X: " + sizeX + "<br>" +
+
+  "Y: " + sizeY + "<br>" +
+
+  "Z: " + sizeZ + "<br>" +
+
+  "Archivo: " + sizeKB + " KB";
+
+
+  dimensions.style.display =
+  "block";
+
+
+  /* Centrar cámara */
+
+  ajustarCamara(size);
+
+
+}
+
+
+
+/* =====================================================
+   AJUSTAR CAMARA
+===================================================== */
+
+
+function ajustarCamara(size) {
+
+
+  const maxSize =
+  Math.max(
+
+    size.x,
+
+    size.y,
+
+    size.z
+
+  );
+
+
+  const distance =
+  maxSize * 2.2;
+
+
+  camera.position.set(
+
+    distance,
+
+    distance,
+
+    distance
+
+  );
+
+
+  camera.near =
+  Math.max(
+    maxSize / 10000,
+    0.001
+  );
+
+
+  camera.far =
+  Math.max(
+    maxSize * 100,
+    1000
+  );
+
+
+  camera.updateProjectionMatrix();
+
+
+  controls.target.set(
+
+    0,
+    0,
+    0
+
+  );
+
+
+  controls.update();
+
+
+}
+
+
+
+/* =====================================================
+   BOTON CENTRAR
+===================================================== */
+
+
+resetButton.addEventListener(
+
+  "click",
+
+  function() {
+
+
+    if (!model || !modelSize) {
+
+      return;
+
+    }
+
+
+    ajustarCamara(modelSize);
+
+
+  }
+
+);
+
+
+
+/* =====================================================
+   WIREFRAME
+===================================================== */
+
+
+let wireframe = false;
+
+
+wireButton.addEventListener(
+
+  "click",
+
+  function() {
+
+
+    if (!model) {
+
+      return;
+
+    }
+
+
+    wireframe =
+    !wireframe;
+
+
+    model.material.wireframe =
+    wireframe;
+
+
+    wireButton.textContent =
+
+      wireframe
+
+      ? "🕸️ Sólido"
+
+      : "🕸️ Wireframe";
+
+
+  }
+
+);
+
+
+
+/* =====================================================
+   CAMBIAR COLOR
+===================================================== */
+
+
+const colores = [
+
+  0xb0b0b0,
+
+  0x00aaff,
+
+  0xff5555,
+
+  0x55cc55,
+
+  0xffaa00,
+
+  0xffffff
+
+];
+
+
+let colorIndex = 0;
+
+
+colorButton.addEventListener(
+
+  "click",
+
+  function() {
+
+
+    if (!model) {
+
+      return;
+
+    }
+
+
+    colorIndex++;
+
+
+    if (
+      colorIndex >= colores.length
+    ) {
+
+      colorIndex = 0;
+
+    }
+
+
+    model.material.color.setHex(
+
+      colores[colorIndex]
+
+    );
+
+
+  }
+
+);
+
+
+
+/* =====================================================
+   RESIZE
+===================================================== */
+
 
 window.addEventListener(
 
@@ -379,7 +920,11 @@ window.addEventListener(
 );
 
 
-/* ANIMACION */
+
+/* =====================================================
+   ANIMACION
+===================================================== */
+
 
 function animate() {
 
@@ -406,7 +951,9 @@ function animate() {
 
 animate();
 
+
 </script>
+
 
 </body>
 
